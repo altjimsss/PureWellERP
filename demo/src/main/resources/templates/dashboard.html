@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${siteTitle}">PureWell ERP</title>
+	<link rel="stylesheet" href="/css/base.css">
+	<link rel="stylesheet" href="/css/dashboard.css">
+</head>
+<body>
+	<div class="app-shell">
+		<aside class="sidebar">
+			<div class="logo-wrap">
+				<img src="/img/purewelllogo.png" alt="PureWell Logo">
+				<div>
+					<strong>PureWell</strong>
+					<span>Refilling Station</span>
+				</div>
+			</div>
+			<nav class="nav">
+				<a href="/" aria-current="page">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+						</span>
+						Dashboard
+					</span>
+					<span class="tag good">Live</span>
+				</a>
+				<a href="/modules/hrm">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 1-8 0"/><path d="M3 20a6 6 0 0 1 18 0"/></svg>
+						</span>
+						Human Resource
+					</span>
+					<span class="tag warn">Soon</span>
+				</a>
+				<a href="/modules/finance">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+						</span>
+						Finance & Accounting
+					</span>
+					<span class="tag warn">Soon</span>
+				</a>
+				<a href="/modules/procurement">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M3 7h18"/><path d="M6 7l1 12h10l1-12"/><path d="M9 11h6"/></svg>
+						</span>
+						Procurement & Inventory
+					</span>
+					<span class="tag warn">Soon</span>
+				</a>
+				<a href="/modules/sales">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M3 7h13l3 4v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M16 7v4h3"/></svg>
+						</span>
+						Sales & Delivery
+					</span>
+					<span class="tag warn">Soon</span>
+				</a>
+			</nav>
+		</aside>
+
+		<main class="main">
+			<div class="panel-header">
+				<div>
+					<h2>Dashboard</h2>
+					<p class="subtle">Overview • <span th:text="${today}">2026-03-17</span></p>
+				</div>
+				<div class="panel-actions">
+					<span class="pill">Operations</span>
+					<span class="pill ghost">March Cycle</span>
+				</div>
+			</div>
+
+			<div class="db-alert" th:if="${!dbAvailable}">
+				<strong>Database offline.</strong>
+				The dashboard is showing placeholders because the Supabase host is unreachable.
+			</div>
+
+			<div class="dash-banner">
+				<div class="dash-banner-track">
+					<div class="dash-slide bg-1">
+						<div>
+							<span class="dash-chip">Route Focus</span>
+							<h3>Optimize deliveries for Zone 3 and Zone 5</h3>
+							<p class="subtle">Reduce empty miles by clustering household refills.</p>
+						</div>
+					</div>
+					<div class="dash-slide bg-2">
+						<div>
+							<span class="dash-chip">Inventory</span>
+							<h3>Caps and seals restock arriving this Friday</h3>
+							<p class="subtle">Prepare storage space and update counts on arrival.</p>
+						</div>
+					</div>
+					<div class="dash-slide bg-3">
+						<div>
+							<span class="dash-chip">Customer Care</span>
+							<h3>Launch loyalty credits for repeat customers</h3>
+							<p class="subtle">Boost weekly orders with refill incentives.</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="stat-row">
+				<div class="stat-card">
+					<p>Vehicles on Track</p>
+					<h3 th:text="${stats.activeVehicles} + ' units'">28 units</h3>
+					<div class="stat-note down">Active fleet status</div>
+				</div>
+				<div class="stat-card">
+					<p>Distance Driven</p>
+					<h3 th:text="${stats.distanceDriven} + ' km'">9,158 km</h3>
+					<div class="stat-note up">Last 7 days</div>
+				</div>
+				<div class="stat-card">
+					<p>Empty Miles</p>
+					<h3 th:text="${stats.emptyMiles} + ' km'">271 km</h3>
+					<div class="stat-note down">Last 7 days</div>
+				</div>
+				<div class="stat-card">
+					<p>Service Time</p>
+					<h3 th:text="${stats.serviceTime} + ' hrs'">158 hrs</h3>
+					<div class="stat-note up">Last 7 days</div>
+				</div>
+			</div>
+
+			<div class="grid-core">
+				<div class="card-map">
+					<div class="card-head">
+						<h4>Fleet Activity Trend</h4>
+						<a href="#" class="detail-link">Details</a>
+					</div>
+					<div class="chart-surface">
+						<canvas id="fleetChart" aria-label="Fleet activity trend chart" role="img"></canvas>
+					</div>
+				</div>
+
+				<div class="card-donut">
+					<div class="card-head">
+						<h4>Service Status</h4>
+						<a href="#" class="detail-link">Details</a>
+					</div>
+					<div class="donut" th:style="'background: conic-gradient(#5a69d8 0 ' + ${stats.servicePercent} + '%, #e8ebf7 ' + ${stats.servicePercent} + '% 100%)'">
+						<div class="donut-core" th:text="${stats.servicePercent} + '%'">17.2%</div>
+					</div>
+					<ul class="legend">
+						<li><span class="dot service"></span> Service needed: <span th:text="${stats.serviceNeeded}">0</span></li>
+						<li><span class="dot wait"></span> Waiting</li>
+						<li><span class="dot active"></span> In service</li>
+						<li><span class="dot done"></span> Fully serviced</li>
+					</ul>
+				</div>
+
+				<div class="card-list">
+					<div class="card-head">
+						<h4>Latest Deliveries</h4>
+						<a href="#" class="detail-link">Details</a>
+					</div>
+					<div class="list-row" th:each="delivery : ${latestDeliveries}">
+						<span th:text="${delivery.customer}">Customer Name</span>
+						<span class="mono" th:text="${delivery.total}">₱0</span>
+					</div>
+				</div>
+
+				<div class="card-chart">
+					<div class="card-head">
+						<h4>Trips by Weekday</h4>
+						<a href="#" class="detail-link">Details</a>
+					</div>
+					<div class="bar-grid">
+						<div class="bar-item" th:each="bar : ${weekdayBars}" th:attr="title=${bar.count} + ' trips'">
+							<span class="bar" th:style="'height: ' + ${bar.percent} + '%'"></span>
+							<small th:text="${bar.label}">Mon</small>
+						</div>
+					</div>
+				</div>
+
+				<div class="card-chart wide">
+					<div class="card-head">
+						<h4>Total Revenue</h4>
+						<a href="#" class="detail-link">Details</a>
+					</div>
+					<div class="line-grid">
+						<canvas id="revenueChart" aria-label="Revenue trend chart" role="img"></canvas>
+					</div>
+				</div>
+			</div>
+		</main>
+	</div>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script th:inline="javascript">
+		const fleetLabels = /*[[${fleetLabels}]]*/ [];
+		const fleetDistance = /*[[${fleetDistance}]]*/ [];
+		const fleetEmpty = /*[[${fleetEmpty}]]*/ [];
+		const revenueLabels = /*[[${revenueLabels}]]*/ [];
+		const revenueSeries = /*[[${revenueSeries}]]*/ [];
+		window.__FLEET_DATA__ = { fleetLabels, fleetDistance, fleetEmpty, revenueLabels, revenueSeries };
+	</script>
+	<script src="/js/dashboard.js"></script>
+</body>
+</html>

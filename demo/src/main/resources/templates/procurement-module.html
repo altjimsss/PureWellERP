@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${siteTitle}">Procurement Module</title>
+	<link rel="stylesheet" href="/css/base.css">
+	<link rel="stylesheet" href="/css/procurement.css">
+</head>
+<body>
+	<div class="app-shell">
+		<aside class="sidebar">
+			<div class="logo-wrap">
+				<img src="/img/purewelllogo.png" alt="PureWell Logo">
+				<div>
+					<strong>PureWell</strong>
+					<span>Refilling Station</span>
+				</div>
+			</div>
+			<nav class="nav">
+				<a href="/">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+						</span>
+						Dashboard
+					</span>
+					<span class="tag good">Live</span>
+				</a>
+				<a href="/modules/hrm">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 1-8 0"/><path d="M3 20a6 6 0 0 1 18 0"/></svg>
+						</span>
+						Human Resource
+					</span>
+					<span class="tag warn">Soon</span>
+				</a>
+				<a href="/modules/finance">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg>
+						</span>
+						Finance & Accounting
+					</span>
+					<span class="tag warn">Soon</span>
+				</a>
+				<a href="/modules/procurement" aria-current="page">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M3 7h18"/><path d="M6 7l1 12h10l1-12"/><path d="M9 11h6"/></svg>
+						</span>
+						Procurement & Inventory
+					</span>
+					<span class="tag warn">Soon</span>
+				</a>
+				<a href="/modules/sales">
+					<span class="label">
+						<span class="nav-icon">
+							<svg viewBox="0 0 24 24"><path d="M3 7h13l3 4v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M16 7v4h3"/></svg>
+						</span>
+						Sales & Delivery
+					</span>
+					<span class="tag warn">Soon</span>
+				</a>
+			</nav>
+		</aside>
+
+		<main class="main">
+			<header class="topbar">
+				<div class="brand">
+					<h1 th:text="${moduleName}">Procurement and Inventory</h1>
+					<span>Suppliers, purchase orders, and inventory tracking</span>
+				</div>
+				<a class="pill" href="/">Back to Dashboard</a>
+			</header>
+
+			<h2 class="section-title">Coming Soon</h2>
+			<div class="section-card">
+				<p>
+					This module is reserved for procurement and inventory. Add suppliers, PO tracking, and stock levels here.
+				</p>
+			</div>
+
+			<p class="footer-note">
+				This placeholder keeps the route live while the module is under development.
+			</p>
+		</main>
+	</div>
+</body>
+</html>
