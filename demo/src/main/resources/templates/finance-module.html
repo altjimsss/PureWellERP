@@ -75,15 +75,161 @@
 				<a class="pill" href="/">Back to Dashboard</a>
 			</header>
 
-			<h2 class="section-title">Coming Soon</h2>
+			<div class="db-alert" th:if="${dbAvailable == false}">
+				<strong>Database offline.</strong> Showing placeholders instead of live finance data.
+			</div>
+
+			<h2 class="section-title">Financial Snapshot</h2>
+			<div class="grid kpi-grid">
+				<div class="kpi-card">
+					<h4>Total Revenue</h4>
+					<div class="value" th:text="${#numbers.formatDecimal(snapshot.totalRevenue,1,2)}">0.00</div>
+					<div class="note" th:text="${snapshot.periodLabel}">Last 30 days</div>
+				</div>
+				<div class="kpi-card">
+					<h4>Total Expenses</h4>
+					<div class="value" th:text="${#numbers.formatDecimal(snapshot.totalExpenses,1,2)}">0.00</div>
+					<div class="note" th:text="${snapshot.periodLabel}">Last 30 days</div>
+				</div>
+				<div class="kpi-card">
+					<h4>Net Income</h4>
+					<div class="value" th:text="${#numbers.formatDecimal(snapshot.netIncome,1,2)}">0.00</div>
+					<div class="note">Revenue minus expenses</div>
+				</div>
+				<div class="kpi-card">
+					<h4>Average Daily Expense</h4>
+					<div class="value" th:text="${#numbers.formatDecimal(snapshot.avgDailyExpense,1,2)}">0.00</div>
+					<div class="note">30-day average</div>
+				</div>
+				<div class="kpi-card">
+					<h4>Expense Entries</h4>
+					<div class="value" th:text="${snapshot.expenseCount}">0</div>
+					<div class="note">Logged in the period</div>
+				</div>
+				<div class="kpi-card">
+					<h4>Financial Records</h4>
+					<div class="value" th:text="${snapshot.recordCount}">0</div>
+					<div class="note">Revenue &amp; expense notes</div>
+				</div>
+			</div>
+
+			<h2 class="section-title">Expense Tracking</h2>
+			<div class="split">
+				<div class="section-card">
+					<h3>Latest Expenses</h3>
+					<table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Type</th>
+								<th>Amount</th>
+								<th>Notes</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="expense : ${recentExpenses}">
+								<td th:text="${expense.date}">2026-03-10</td>
+								<td th:text="${expense.type}">Utilities</td>
+								<td class="mono" th:text="${#numbers.formatDecimal(expense.amount,1,2)}">0.00</td>
+								<td th:text="${expense.description}">Sample expense</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(recentExpenses)}">
+								<td colspan="4">No expense records yet.</td>
+							</tr>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="section-card">
+					<h3>Expense Mix</h3>
+					<p class="helper">Share of total expenses by category (last 30 days).</p>
+					<div class="breakdown-list">
+						<div class="breakdown-row" th:each="item : ${expenseBreakdown}">
+							<div class="label">
+								<span th:text="${item.type}">Utilities</span>
+								<span class="mono" th:text="${#numbers.formatDecimal(item.total,1,2)}">0.00</span>
+							</div>
+							<div class="bar">
+								<span class="bar-fill" th:style="'width:' + ${item.percent} + '%'"></span>
+							</div>
+							<div class="percent" th:text="${item.percent + '%'}">0%</div>
+						</div>
+						<div class="empty-note" th:if="${#lists.isEmpty(expenseBreakdown)}">
+							Add expenses to see category breakdown.
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<h2 class="section-title">Financial Records</h2>
 			<div class="section-card">
-				<p>
-					This module is reserved for finance workflows. Add financial records, expenses, and reports here.
-				</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Date</th>
+							<th>Type</th>
+							<th>Amount</th>
+							<th>Notes</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="record : ${recentRecords}">
+							<td th:text="${record.date}">2026-03-10</td>
+							<td>
+								<span class="tag" th:classappend="${record.type == 'Revenue'} ? ' good' : ' warn'"
+									th:text="${record.type}">Revenue</span>
+							</td>
+							<td class="mono" th:text="${#numbers.formatDecimal(record.amount,1,2)}">0.00</td>
+							<td th:text="${record.notes}">Record note</td>
+						</tr>
+						<tr th:if="${#lists.isEmpty(recentRecords)}">
+							<td colspan="4">No financial records yet.</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<h2 class="section-title">Basic Financial Reports</h2>
+			<div class="section-card">
+				<table class="reports-table">
+					<thead>
+						<tr>
+							<th>Month</th>
+							<th>Revenue</th>
+							<th>Expenses</th>
+							<th>Net</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="report : ${monthlyReports}">
+							<td th:text="${report.label}">Mar 2026</td>
+							<td>
+								<div class="report-cell">
+									<span class="mono" th:text="${#numbers.formatDecimal(report.revenue,1,2)}">0.00</span>
+									<div class="bar">
+										<span class="bar-fill good" th:style="'width:' + ${report.revenuePercent} + '%'"></span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="report-cell">
+									<span class="mono" th:text="${#numbers.formatDecimal(report.expenses,1,2)}">0.00</span>
+									<div class="bar">
+										<span class="bar-fill warn" th:style="'width:' + ${report.expensePercent} + '%'"></span>
+									</div>
+								</div>
+							</td>
+							<td class="mono" th:text="${#numbers.formatDecimal(report.net,1,2)}">0.00</td>
+						</tr>
+						<tr th:if="${#lists.isEmpty(monthlyReports)}">
+							<td colspan="4">No reports yet. Add records to generate monthly trends.</td>
+						</tr>
+					</tbody>
+				</table>
 			</div>
 
 			<p class="footer-note">
-				This placeholder keeps the route live while the module is under development.
+				Finance module data is pulled directly from the database tables for expenses and financial records.
 			</p>
 		</main>
 	</div>

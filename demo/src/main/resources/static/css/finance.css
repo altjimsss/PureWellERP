@@ -1,1 +1,98 @@
 
+body {
+	background: var(--bg-mid);
+}
+
+.db-alert {
+	margin-top: 24px;
+	padding: 14px 16px;
+	border-radius: 14px;
+	background: rgba(212, 161, 77, 0.16);
+	border: 1px solid rgba(212, 161, 77, 0.3);
+	color: #8a5a14;
+	font-weight: 600;
+}
+
+.section-card h3 {
+	margin: 0 0 14px;
+	font-size: 1rem;
+}
+
+.helper {
+	margin-top: 0;
+	color: var(--text-dim);
+	font-size: 0.9rem;
+}
+
+.breakdown-list {
+	display: grid;
+	gap: 16px;
+}
+
+.breakdown-row {
+	display: grid;
+	gap: 10px;
+}
+
+.breakdown-row .label {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font-size: 0.9rem;
+}
+
+.bar {
+	height: 10px;
+	border-radius: 999px;
+	background: #e7f0f8;
+	overflow: hidden;
+}
+
+.bar-fill {
+	display: block;
+	height: 100%;
+	border-radius: inherit;
+	background: linear-gradient(90deg, #3aa4e0, #8fd3f4);
+	width: 0;
+	transition: width 0.4s ease;
+}
+
+.bar-fill.good {
+	background: linear-gradient(90deg, #3f9d7a, #8fe1c2);
+}
+
+.bar-fill.warn {
+	background: linear-gradient(90deg, #d4a14d, #f2d082);
+}
+
+.percent {
+	font-size: 0.8rem;
+	color: var(--text-dim);
+	text-align: right;
+}
+
+.empty-note {
+	color: var(--text-dim);
+	font-size: 0.9rem;
+}
+
+.reports-table .report-cell {
+	display: grid;
+	gap: 6px;
+}
+
+.reports-table .bar {
+	height: 8px;
+}
+
+@media (max-width: 720px) {
+	.breakdown-row .label {
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 6px;
+	}
+
+	.reports-table .report-cell {
+		gap: 8px;
+	}
+}
