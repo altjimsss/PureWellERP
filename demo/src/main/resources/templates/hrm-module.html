@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title th:text="${siteTitle}">HRM Module</title>
 	<link rel="stylesheet" href="/css/base.css">
+	<link rel="stylesheet" href="/css/dashboard.css">
 	<link rel="stylesheet" href="/css/hrm.css">
 </head>
 <body>
@@ -34,7 +35,7 @@
 						</span>
 						Human Resource
 					</span>
-					<span class="tag warn">Soon</span>
+					<span class="tag good">Live</span>
 				</a>
 				<a href="/modules/finance">
 					<span class="label">
@@ -67,25 +68,390 @@
 		</aside>
 
 		<main class="main">
-			<header class="topbar">
-				<div class="brand">
-					<h1 th:text="${moduleName}">Human Resource Management</h1>
-					<span>Employee records, attendance, and payroll basics</span>
+			<div class="panel-header">
+				<div>
+					<h2 th:text="${moduleName}">Human Resource Management</h2>
+					<p class="subtle">
+						Employee records, attendance management, and payroll basics -
+						<span th:text="${snapshot.periodLabel}">As of today</span>
+					</p>
 				</div>
-				<a class="pill" href="/">Back to Dashboard</a>
-			</header>
+				<div class="panel-actions">
+					<span class="pill">HRM</span>
+					<a class="pill ghost icon-pill icon-only" href="/" aria-label="Back to Dashboard">
+						<span class="pill-icon">
+							<svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+						</span>
+					</a>
+				</div>
+			</div>
 
-			<h2 class="section-title">Coming Soon</h2>
-			<div class="section-card">
-				<p>
-					This module is reserved for HRM. Add employee profiles, attendance logs, and payroll summaries here.
-				</p>
+			<div class="db-alert" th:if="${dbAvailable == false}">
+				<strong>Database offline.</strong> Showing placeholders instead of live HRM data.
+			</div>
+
+			<div class="stat-row">
+				<div class="stat-card">
+					<p>Total Employees</p>
+					<h3 th:text="${snapshot.totalEmployees}">0</h3>
+					<div class="stat-note up">Active headcount</div>
+				</div>
+				<div class="stat-card">
+					<p>Departments</p>
+					<h3 th:text="${snapshot.departmentCount}">0</h3>
+					<div class="stat-note up">Distinct teams</div>
+				</div>
+				<div class="stat-card">
+					<p>New Hires</p>
+					<h3 th:text="${snapshot.newHires}">0</h3>
+					<div class="stat-note up">Last 30 days</div>
+				</div>
+				<div class="stat-card">
+					<p>Present</p>
+					<h3 th:text="${snapshot.presentToday}">0</h3>
+					<div class="stat-note up" th:text="${snapshot.periodLabel}">As of today</div>
+				</div>
+				<div class="stat-card">
+					<p>Absent</p>
+					<h3 th:text="${snapshot.absentToday}">0</h3>
+					<div class="stat-note down" th:text="${snapshot.periodLabel}">As of today</div>
+				</div>
+				<div class="stat-card">
+					<p>Attendance Rate</p>
+					<h3><span th:text="${snapshot.attendanceRate}">0</span>%</h3>
+					<div class="stat-note up">Present vs absent</div>
+				</div>
+			</div>
+
+			<div class="grid-core hrm-grid">
+				<section class="hrm-card span-6">
+					<div class="card-head">
+						<h4>Employee Records</h4>
+						<span class="detail-link">Latest hires</span>
+					</div>
+					<div class="table-actions compact-filters">
+						<div class="filter-search">
+							<label class="input-field">
+								<input id="employeeSearch" class="search-input" type="search" placeholder="Search by name, role, or department" aria-label="Search employees">
+							</label>
+						</div>
+						<details class="filter-menu">
+							<summary class="pill ghost icon-pill icon-only" aria-label="Advanced filters">
+								<span class="pill-icon">
+									<svg viewBox="0 0 24 24"><path d="M4 6h16"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+								</span>
+							</summary>
+							<div class="filter-panel">
+								<label class="input-field">
+									<span>Department</span>
+									<select id="departmentFilter">
+										<option value="">All departments</option>
+										<option th:each="dept : ${departments}" th:value="${dept}" th:text="${dept}">Department</option>
+									</select>
+								</label>
+								<label class="input-field">
+									<span>Position</span>
+									<select id="positionFilter">
+										<option value="">All positions</option>
+										<option th:each="pos : ${positions}" th:value="${pos}" th:text="${pos}">Position</option>
+									</select>
+								</label>
+							</div>
+						</details>
+						<span id="employeeCount" class="meta-note">Showing 0</span>
+					</div>
+					<details class="employee-add">
+						<summary class="pill ghost">Add Employee</summary>
+						<form class="employee-form" method="post" action="/modules/hrm/employees">
+							<label>
+								First Name
+								<input type="text" name="firstName" placeholder="First name" required>
+							</label>
+							<label>
+								Last Name
+								<input type="text" name="lastName" placeholder="Last name" required>
+							</label>
+							<label>
+								Position
+								<input type="text" name="position" placeholder="Role" required>
+							</label>
+							<label>
+								Department
+								<input type="text" name="department" placeholder="Department" required>
+							</label>
+							<label>
+								Hire Date
+								<input type="date" name="hireDate" required>
+							</label>
+							<label>
+								Salary
+								<input type="number" name="salary" step="0.01" min="0" placeholder="0.00" required>
+							</label>
+							<button class="pill" type="submit">Save Employee</button>
+						</form>
+					</details>
+					<div class="table-scroll">
+						<table>
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Position</th>
+								<th>Department</th>
+								<th>Hire Date</th>
+								<th>Salary</th>
+								<th class="action-col">Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="employee : ${recentEmployees}"
+								th:attr="data-name=${employee.name},data-position=${employee.position},data-department=${employee.department}">
+								<td th:text="${employee.name}">Employee Name</td>
+								<td th:text="${employee.position}">Position</td>
+								<td th:text="${employee.department}">Department</td>
+								<td th:text="${employee.hireDate}">2026-03-10</td>
+								<td class="mono" th:text="${#numbers.formatDecimal(employee.salary,1,2)}">0.00</td>
+								<td>
+									<form class="inline-form" method="post" action="/modules/hrm/employees/delete">
+										<input type="hidden" name="employeeId" th:value="${employee.id}">
+										<button class="icon-btn" type="submit" aria-label="Remove employee">
+											<svg viewBox="0 0 24 24" aria-hidden="true">
+												<path d="M4 7h16"/>
+												<path d="M9 7V5h6v2"/>
+												<path d="M9 11v6"/>
+												<path d="M15 11v6"/>
+												<path d="M6 7l1 13h10l1-13"/>
+											</svg>
+										</button>
+									</form>
+								</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(recentEmployees)}">
+								<td colspan="6">No employee records yet.</td>
+							</tr>
+						</tbody>
+						</table>
+					</div>
+				</section>
+
+				<section class="hrm-card span-6">
+					<div class="card-head">
+						<h4>Attendance Management</h4>
+						<span class="detail-link" th:text="${attendanceDate}">2026-03-17</span>
+					</div>
+					<div class="summary-grid">
+						<div class="summary-row" th:each="summary : ${attendanceSummary}">
+							<span th:text="${summary.status}">Present</span>
+							<span class="mono" th:text="${summary.total}">0</span>
+						</div>
+					</div>
+					<table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Employee</th>
+								<th>Department</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="row : ${attendanceToday}">
+								<td th:text="${row.date}">2026-03-17</td>
+								<td th:text="${row.name}">Employee Name</td>
+								<td th:text="${row.department}">Department</td>
+								<td>
+									<span class="tag" th:classappend="${row.status == 'Present'} ? ' good' : ' warn'"
+										th:text="${row.status}">Present</span>
+								</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(attendanceToday)}">
+								<td colspan="4">No attendance records yet.</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+
+				<div class="payroll-grid">
+					<div class="payroll-widget span-4">
+						<h5>Payroll Data Snapshot</h5>
+						<div class="snapshot-grid">
+							<div>
+								<span>Total Payroll</span>
+								<strong class="mono" th:text="${#numbers.formatDecimal(payrollBasics.totalPayroll,1,2)}">0.00</strong>
+							</div>
+							<div>
+								<span>Average Salary</span>
+								<strong class="mono" th:text="${#numbers.formatDecimal(payrollBasics.avgSalary,1,2)}">0.00</strong>
+							</div>
+							<div>
+								<span>Highest Salary</span>
+								<strong class="mono" th:text="${#numbers.formatDecimal(payrollBasics.maxSalary,1,2)}">0.00</strong>
+							</div>
+							<div>
+								<span>Lowest Salary</span>
+								<strong class="mono" th:text="${#numbers.formatDecimal(payrollBasics.minSalary,1,2)}">0.00</strong>
+							</div>
+						</div>
+						<p class="helper">Calculated directly from Supabase employee salary data.</p>
+					</div>
+
+					<div class="payroll-widget span-8">
+						<h5>Salary Calculation</h5>
+						<form id="salaryCalc" class="form-grid">
+							<label>
+								Basic Salary
+								<input type="number" name="basic" step="0.01" min="0" placeholder="0.00" required>
+							</label>
+							<label>
+								Allowances
+								<input type="number" name="allowances" step="0.01" min="0" placeholder="0.00">
+							</label>
+							<label>
+								Overtime Hours
+								<input type="number" name="overtimeHours" step="0.1" min="0" placeholder="0">
+							</label>
+							<label>
+								Overtime Rate
+								<input type="number" name="overtimeRate" step="0.01" min="0" placeholder="0.00">
+							</label>
+							<label>
+								Tax Rate (%)
+								<input type="number" name="taxRate" step="0.1" min="0" placeholder="0">
+							</label>
+							<label>
+								Social Security (%)
+								<input type="number" name="ssRate" step="0.1" min="0" placeholder="0">
+							</label>
+							<label>
+								Other Deductions
+								<input type="number" name="otherDeductions" step="0.01" min="0" placeholder="0.00">
+							</label>
+						</form>
+						<div class="calc-results">
+							<div>
+								<span>Gross Pay</span>
+								<strong class="mono" data-calc="gross">0.00</strong>
+							</div>
+							<div>
+								<span>Total Deductions</span>
+								<strong class="mono" data-calc="deductions">0.00</strong>
+							</div>
+							<div>
+								<span>Net Pay</span>
+								<strong class="mono" data-calc="net">0.00</strong>
+							</div>
+						</div>
+					</div>
+
+					<div class="payroll-widget span-4">
+						<h5>Payroll Processing</h5>
+						<form id="payrollProcess" class="form-grid">
+							<label>
+								Pay Date
+								<input type="date" name="payDate" th:value="${attendanceDate}">
+							</label>
+							<label>
+								Method
+								<select name="method">
+									<option>Bank Transfer</option>
+									<option>Cash Release</option>
+									<option>Cheque</option>
+								</select>
+							</label>
+							<label>
+								Batch Notes
+								<input type="text" name="notes" placeholder="e.g. March payroll">
+							</label>
+							<button class="pill ghost" type="submit">Queue Payroll</button>
+						</form>
+						<p class="helper" id="payrollProcessStatus">Ready to schedule payroll release.</p>
+					</div>
+
+					<div class="payroll-widget span-4">
+						<h5>Record Keeping</h5>
+						<p class="helper">Search and validate employee payroll records using the table on the left.</p>
+						<div class="record-stats">
+							<div>
+								<span>Employees</span>
+								<strong th:text="${snapshot.totalEmployees}">0</strong>
+							</div>
+							<div>
+								<span>Departments</span>
+								<strong th:text="${snapshot.departmentCount}">0</strong>
+							</div>
+						</div>
+						<button class="pill ghost" type="button" id="clearEmployeeSearch">Clear search</button>
+					</div>
+
+					<div class="payroll-widget span-4">
+						<h5>Compliance &amp; Reporting</h5>
+						<form id="complianceReport" class="form-grid wide">
+							<label>
+								Reporting Period
+								<select name="period">
+									<option>Last 30 days</option>
+									<option>Last Quarter</option>
+									<option>Year-to-date</option>
+								</select>
+							</label>
+							<label>
+								Report Type
+								<select name="type">
+									<option>Tax Withholding</option>
+									<option>Social Security</option>
+									<option>Payroll Summary</option>
+								</select>
+							</label>
+							<label>
+								Agency Notes
+								<input type="text" name="agency" placeholder="e.g. BIR / SSS">
+							</label>
+							<button class="pill ghost" type="submit">Generate Report</button>
+						</form>
+						<p class="helper" id="complianceStatus">Select a period to prepare a compliance report.</p>
+					</div>
+
+					<div class="payroll-widget span-12">
+						<h5>Benefits &amp; Deductions</h5>
+						<form id="benefitsForm" class="form-grid wide">
+							<label>
+								Item
+								<input type="text" name="item" placeholder="e.g. Health insurance">
+							</label>
+							<label>
+								Type
+								<select name="type">
+									<option value="benefit">Benefit</option>
+									<option value="deduction">Deduction</option>
+								</select>
+							</label>
+							<label>
+								Amount
+								<input type="number" name="amount" step="0.01" min="0" placeholder="0.00">
+							</label>
+							<button class="pill ghost" type="submit">Add Item</button>
+						</form>
+						<div class="benefits-list" id="benefitsList">
+							<div class="empty-note">No benefits or deductions added yet.</div>
+						</div>
+						<div class="benefits-total">
+							<div>
+								<span>Total Benefits</span>
+								<strong class="mono" id="benefitsTotal">0.00</strong>
+							</div>
+							<div>
+								<span>Total Deductions</span>
+								<strong class="mono" id="deductionsTotal">0.00</strong>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 
 			<p class="footer-note">
-				This placeholder keeps the route live while the module is under development.
+				HRM module data is pulled directly from the database tables for employees and attendance.
 			</p>
 		</main>
 	</div>
+	<script src="/js/hrm.js"></script>
 </body>
 </html>
