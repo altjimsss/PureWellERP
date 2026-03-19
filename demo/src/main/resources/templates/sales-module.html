@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title th:text="${siteTitle}">Sales and Delivery</title>
 	<link rel="stylesheet" href="/css/base.css">
+	<link rel="stylesheet" href="/css/dashboard.css">
 	<link rel="stylesheet" href="/css/sales.css">
 </head>
 <body>
@@ -61,7 +62,7 @@
 						</span>
 						Sales & Delivery
 					</span>
-					<span class="tag warn">Soon</span>
+					<span class="tag good">Live</span>
 				</a>
 			</nav>
 			<div class="sidebar-footer" th:if="${userProfile != null}">
@@ -88,25 +89,306 @@
 		</aside>
 
 		<main class="main">
-			<header class="topbar">
-				<div class="brand">
-					<h1>Sales and Delivery Module</h1>
-					<span>Track customers, orders, and delivery performance</span>
+			<div class="panel-header">
+				<div>
+					<h2 th:text="${moduleName}">Sales and Delivery</h2>
+					<p class="subtle">Customer records, sales transactions, and delivery tracking</p>
 				</div>
-				<a class="pill" href="/">Back to Dashboard</a>
-			</header>
+				<div class="panel-actions">
+					<span class="pill">Sales Ops</span>
+					<a class="pill ghost icon-only" href="/" aria-label="Back to Dashboard">
+						<span class="pill-icon">
+							<svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+						</span>
+					</a>
+				</div>
+			</div>
 
-			<h2 class="section-title" th:text="${moduleName}">Sales and Delivery</h2>
-			<div class="section-card">
-				<h3>Coming Soon</h3>
-				<p>
-					This module is reserved for your Sales and Delivery features. Your teammate can build out
-					customer records, sales transactions, and order tracking here.
-				</p>
+			<div class="db-alert" th:if="${!dbAvailable}">
+				<strong>Database offline.</strong>
+				The module is showing placeholders because the database is unavailable.
+			</div>
+
+			<div class="stat-row">
+				<div class="stat-card">
+					<p>Total Revenue</p>
+					<h3 class="mono" th:text="${#numbers.formatDecimal(snapshot.totalRevenue,1,2)}">0.00</h3>
+					<div class="stat-note up" th:text="${snapshot.periodLabel}">Last 30 days</div>
+				</div>
+				<div class="stat-card">
+					<p>Total Orders</p>
+					<h3 th:text="${snapshot.totalOrders}">0</h3>
+					<div class="stat-note up">Sales transactions</div>
+				</div>
+				<div class="stat-card">
+					<p>Average Order</p>
+					<h3 class="mono" th:text="${#numbers.formatDecimal(snapshot.avgOrderValue,1,2)}">0.00</h3>
+					<div class="stat-note up">Rolling 30-day avg</div>
+				</div>
+				<div class="stat-card">
+					<p>Pending Deliveries</p>
+					<h3 th:text="${snapshot.pendingDeliveries}">0</h3>
+					<div class="stat-note down">Needs routing</div>
+				</div>
+				<div class="stat-card">
+					<p>Delivered Orders</p>
+					<h3 th:text="${snapshot.deliveredOrders}">0</h3>
+					<div class="stat-note up">Completed</div>
+				</div>
+			</div>
+
+			<div class="grid-core sales-grid">
+				<section class="sales-card quick-actions record">
+					<div class="card-head">
+						<h4>Record a Sale</h4>
+						<span class="detail-link">Create order</span>
+					</div>
+					<form class="record-form" method="post" action="/modules/sales/record">
+						<label class="search-field">
+							Search Products
+							<input type="search" name="productSearch" placeholder="Search products">
+						</label>
+						<label class="search-field">
+							Search Customers
+							<input type="search" name="customerSearch" placeholder="Search customers">
+						</label>
+						<label>
+							Customer
+							<select name="customerId" required>
+								<option value="" disabled selected>Select customer</option>
+								<option th:each="customer : ${customers}" th:value="${customer.id}" th:text="${customer.name}">Customer</option>
+							</select>
+						</label>
+						<label>
+							Product
+							<select name="productId" required>
+								<option value="" disabled selected>Select product</option>
+								<option th:each="product : ${products}" th:value="${product.id}"
+									th:text="${product.name} + ' (₱' + ${#numbers.formatDecimal(product.price,1,2)} + ')'">Product</option>
+							</select>
+						</label>
+						<label>
+							Quantity
+							<input type="number" name="quantity" min="1" value="1" required>
+						</label>
+						<button class="pill" type="submit">Record Sale</button>
+					</form>
+				</section>
+
+				<section class="sales-card quick-actions add-customer">
+					<div class="card-head">
+						<h4>Add New Customer</h4>
+						<span class="detail-link">New record</span>
+					</div>
+					<form class="customer-form" method="post" action="/modules/sales/customers/add">
+						<label>
+							Customer Name
+							<input type="text" name="name" required>
+						</label>
+						<label>
+							Contact
+							<input type="text" name="contact" required>
+						</label>
+						<label class="full">
+							Address
+							<input type="text" name="address" required>
+						</label>
+						<button class="pill ghost" type="submit">Add Customer</button>
+					</form>
+				</section>
+
+				<section class="sales-card quick-actions add-product">
+					<div class="card-head">
+						<h4>Add New Product</h4>
+						<span class="detail-link">Catalog</span>
+					</div>
+					<form class="product-form" method="post" action="/modules/sales/products/add">
+						<label>
+							Product Name
+							<input type="text" name="name" required>
+						</label>
+						<label>
+							Price
+							<input type="number" name="price" min="0" step="0.01" required>
+						</label>
+						<button class="pill ghost" type="submit">Add Product</button>
+					</form>
+				</section>
+
+				<section class="sales-card customers scrollable">
+					<div class="card-head">
+						<h4>Customer Records</h4>
+						<form class="filter-form" method="get" action="/modules/sales">
+							<input type="hidden" name="salesPeriod" th:value="${salesPeriod}">
+							<input type="hidden" name="salesView" th:value="${salesView}">
+							<input type="hidden" name="deliveriesView" th:value="${deliveriesView}">
+							<select name="customersView">
+								<option value="recent" th:selected="${customersView == 'recent'}">Latest 8</option>
+								<option value="all" th:selected="${customersView == 'all'}">View all</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+					<div class="table-search">
+						<span class="search-icon" aria-hidden="true">
+							<svg viewBox="0 0 24 24">
+								<circle cx="11" cy="11" r="7"></circle>
+								<path d="M20 20l-3.5-3.5"></path>
+							</svg>
+						</span>
+						<input type="search" id="customerSearch" placeholder="Search customer name, contact, address">
+					</div>
+					<table>
+						<thead>
+							<tr>
+								<th>Name</th>
+								<th>Contact</th>
+								<th>Address</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="customer : ${customers}" class="customer-row"
+								th:attr="data-search=${customer.name} + ' ' + ${customer.contact} + ' ' + ${customer.address}">
+								<td th:text="${customer.name}">Customer</td>
+								<td th:text="${customer.contact}">0918xxxx</td>
+								<td th:text="${customer.address}">Address</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(customers)}">
+								<td colspan="3">No customers yet.</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+
+				<section class="sales-card deliveries scrollable">
+					<div class="card-head">
+						<h4>Order & Delivery Tracking</h4>
+						<form class="filter-form" method="get" action="/modules/sales">
+							<input type="hidden" name="salesPeriod" th:value="${salesPeriod}">
+							<input type="hidden" name="salesView" th:value="${salesView}">
+							<input type="hidden" name="customersView" th:value="${customersView}">
+							<select name="deliveriesView">
+								<option value="recent" th:selected="${deliveriesView == 'recent'}">Latest 8</option>
+								<option value="all" th:selected="${deliveriesView == 'all'}">View all</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+					<table>
+						<thead>
+							<tr>
+								<th>Customer</th>
+								<th>Total</th>
+								<th>Delivery</th>
+								<th>Status</th>
+								<th>Update</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="delivery : ${deliveries}">
+								<td th:text="${delivery.customer}">Customer</td>
+								<td class="mono" th:text="${#numbers.formatDecimal(delivery.total,1,2)}">0.00</td>
+								<td th:text="${delivery.deliveryDate}">2026-03-18</td>
+								<td>
+									<form class="inline-form status-only"
+										method="post"
+										action="/modules/sales/deliveries/update"
+										th:attr="id=${'delivery-form-' + delivery.id}">
+										<input type="hidden" name="orderId" th:value="${delivery.id}">
+										<div class="status-toggle" role="group" aria-label="Delivery status">
+											<label class="status-chip pending" title="Pending" aria-label="Pending">
+												<input type="radio" name="status" value="Pending"
+													th:checked="${delivery.status == 'Pending'}">
+												<span class="status-icon">
+													<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+												</span>
+											</label>
+											<label class="status-chip delivered" title="Delivered" aria-label="Delivered">
+												<input type="radio" name="status" value="Delivered"
+													th:checked="${delivery.status == 'Delivered'}">
+												<span class="status-icon">
+													<svg viewBox="0 0 24 24"><path d="M3 7h11v8H3z"/><path d="M14 10h4l3 3v2h-7z"/><path d="M6 18a1.5 1.5 0 1 0 3 0"/><path d="M16 18a1.5 1.5 0 1 0 3 0"/><path d="M9 12l2 2 3-4"/></svg>
+												</span>
+											</label>
+										</div>
+									</form>
+								</td>
+								<td>
+									<div class="update-cell">
+										<button class="pill ghost icon-only"
+											type="submit"
+											aria-label="Update delivery status"
+											th:attr="form=${'delivery-form-' + delivery.id}">
+											<span class="pill-icon">
+												<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66"/><path d="M20 4v6h-6"/></svg>
+											</span>
+										</button>
+									</div>
+								</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(deliveries)}">
+								<td colspan="5">No deliveries yet.</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+
+				<section class="sales-card history scrollable">
+					<div class="card-head">
+						<h4>Sales History</h4>
+						<div class="export-actions">
+							<a class="pill ghost icon-only" aria-label="Download sales history PDF"
+								th:href="@{/modules/sales/history/report(format='pdf', salesPeriod=${salesPeriod})}">
+								<span class="pill-icon">
+									<svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg>
+								</span>
+							</a>
+						</div>
+						<form class="filter-form" method="get" action="/modules/sales">
+							<input type="hidden" name="customersView" th:value="${customersView}">
+							<input type="hidden" name="deliveriesView" th:value="${deliveriesView}">
+							<select name="salesPeriod">
+								<option value="7" th:selected="${salesPeriod == '7'}">Last 7 days</option>
+								<option value="30" th:selected="${salesPeriod == '30'}">Last 30 days</option>
+								<option value="90" th:selected="${salesPeriod == '90'}">Last 90 days</option>
+								<option value="all" th:selected="${salesPeriod == 'all'}">All time</option>
+							</select>
+							<select name="salesView">
+								<option value="recent" th:selected="${salesView == 'recent'}">Latest 8</option>
+								<option value="all" th:selected="${salesView == 'all'}">View all</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+					<table>
+						<thead>
+							<tr>
+								<th>Customer</th>
+								<th>Product</th>
+								<th>Qty</th>
+								<th>Total</th>
+								<th>Sale Date</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="sale : ${salesHistory}" class="order-row"
+								th:attr="data-order-id=${sale.id}">
+								<td th:text="${sale.customer}">Customer</td>
+								<td th:text="${sale.product}">Product</td>
+								<td th:text="${sale.quantity}">0</td>
+								<td class="mono" th:text="${#numbers.formatDecimal(sale.total,1,2)}">0.00</td>
+								<td th:text="${sale.saleDate}">2026-03-18T10:00</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(salesHistory)}">
+								<td colspan="5">No sales yet.</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
 			</div>
 
 			<p class="footer-note">
-				This placeholder keeps the route live while the module is under development.
+				Sales and delivery data is pulled from customer, sales, and deliveries tables in the database.
 			</p>
 		</main>
 	</div>
@@ -120,6 +402,83 @@
 			</div>
 		</div>
 	</div>
+	<div class="toast" id="recordToast"
+		th:attr="data-status=${recordStatus}"
+		th:if="${recordStatus != null}">
+		<span class="toast-message"
+			th:text="${recordStatus == 'success'} ? 'Sale recorded successfully.' : 'Unable to record sale. Try again.'">
+			Sale recorded successfully.
+		</span>
+	</div>
+	<div class="toast" id="updateToast"
+		th:attr="data-status=${updateStatus}"
+		th:if="${updateStatus != null}">
+		<span class="toast-message" th:text="${updateStatus == 'success'} ? 'Delivery updated.' : 'Update failed.'">
+			Delivery updated.
+		</span>
+	</div>
+	<div class="toast" id="customerToast"
+		th:attr="data-status=${addCustomerStatus}"
+		th:if="${addCustomerStatus != null}">
+		<span class="toast-message"
+			th:text="${addCustomerStatus == 'success'} ? 'New customer added.' : (${addCustomerStatus == 'duplicate'} ? 'Customer already exists.' : 'Unable to add customer.')">
+			New customer added.
+		</span>
+	</div>
+	<div class="toast" id="productToast"
+		th:attr="data-status=${addProductStatus}"
+		th:if="${addProductStatus != null}">
+		<span class="toast-message"
+			th:text="${addProductStatus == 'success'} ? 'New product added.' : 'Unable to add product.'">
+			New product added.
+		</span>
+	</div>
+	<div class="modal" id="orderModal" aria-hidden="true">
+		<div class="modal-card">
+			<div class="modal-header">
+				<h4>Order Summary</h4>
+				<div class="modal-actions">
+					<a class="pill ghost icon-only" aria-label="Download order PDF" data-order-download="pdf">
+						<span class="pill-icon">
+							<svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M5 20h14"/></svg>
+						</span>
+					</a>
+				</div>
+				<button class="pill ghost icon-only" type="button" data-modal-close aria-label="Close">
+					<span class="pill-icon">
+						<svg viewBox="0 0 24 24"><path d="M6 6l12 12"/><path d="M18 6l-12 12"/></svg>
+					</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<div class="receipt-card">
+					<div class="receipt-header">
+						<div>
+							<h5>PureWell Refilling Station</h5>
+							<span class="receipt-subtitle">Order Receipt</span>
+						</div>
+						<div class="receipt-meta">
+							<span class="receipt-status-label">Status</span>
+							<span class="status-pill pending" id="orderStatusBadgeReceipt">Pending</span>
+						</div>
+					</div>
+					<div class="receipt-info" id="orderSummary"></div>
+					<div class="receipt-divider"></div>
+					<div class="summary-items receipt-items">
+						<div class="summary-row summary-head">
+							<span>Item</span><span>Qty</span><span>Price</span><span>Total</span>
+						</div>
+						<div id="orderItems"></div>
+						<div class="summary-row summary-total">
+							<span>Total</span>
+							<span class="mono" id="orderTotal">0.00</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	<script src="/js/signout.js"></script>
+	<script src="/js/sales.js"></script>
 </body>
 </html>
