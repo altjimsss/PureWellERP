@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title th:text="${siteTitle}">PureWell Login</title>
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+	<link rel="stylesheet" href="/css/login.css">
+</head>
+<body class="auth-page">
+	<div class="container">
+		<div class="forms-container">
+			<div class="signin-signup">
+			<form action="/login" method="post" class="sign-in-form" autocomplete="off">
+				<img src="/img/purewelllogo.png" class="form-logo" alt="PureWell Logo">
+				<h2 class="title">Admin Login</h2>
+				<div class="input-field">
+					<span class="icon">@</span>
+					<input id="admin-username" type="text" name="username" placeholder="Admin username" required autofocus>
+				</div>
+					<div class="input-field">
+						<span class="icon">*</span>
+						<input id="admin-password" type="password" name="password" placeholder="Admin password">
+					</div>
+					<input type="hidden" name="role" value="Admin">
+					<div class="form-alert" th:if="${error}">
+						<strong>Login failed.</strong>
+						<span th:text="${error}">Employee ID not found.</span>
+					</div>
+					<input type="submit" value="Login" class="btn solid">
+					<p class="social-text">Admin access only</p>
+				</form>
+
+			<form action="/login" method="post" class="sign-up-form" autocomplete="off">
+				<img src="/img/purewelllogo.png" class="form-logo" alt="PureWell Logo">
+				<h2 class="title">Staff Login</h2>
+				<div class="input-field">
+					<span class="icon">@</span>
+					<input id="staff-username" type="text" name="username" placeholder="Staff username" required>
+				</div>
+					<div class="input-field">
+						<span class="icon">*</span>
+						<input id="staff-password" type="password" name="password" placeholder="Staff password">
+					</div>
+					<input type="hidden" name="role" value="Staff">
+					<div class="form-alert" th:if="${error}">
+						<strong>Login failed.</strong>
+						<span th:text="${error}">Employee ID not found.</span>
+					</div>
+					<input type="submit" class="btn" value="Login">
+					<p class="social-text">Use your staff credentials</p>
+				</form>
+			</div>
+		</div>
+
+		<div class="panels-container">
+			<div class="panel left-panel">
+				<div class="content">
+					<h3>Staff account?</h3>
+					<p>
+						Switch to staff access for daily operations and deliveries.
+					</p>
+					<button class="btn transparent" id="sign-up-btn" type="button">Staff login</button>
+				</div>
+				<img src="/img/smiley-delivery-man.png" class="image" alt="Staff delivery illustration">
+			</div>
+			<div class="panel right-panel">
+				<div class="content">
+					<h3>Admin account?</h3>
+					<p>
+						Return to the admin view for analytics and approvals.
+					</p>
+					<button class="btn transparent" id="sign-in-btn" type="button">Admin login</button>
+				</div>
+				<img src="/img/delivery-man-pointing.png" class="image" alt="Admin delivery illustration">
+			</div>
+		</div>
+	</div>
+
+	<script src="/js/login.js"></script>
+</body>
+</html>

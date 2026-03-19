@@ -65,6 +65,27 @@
 					<span class="tag warn">Soon</span>
 				</a>
 			</nav>
+			<div class="sidebar-footer" th:if="${userProfile != null}">
+				<div class="user-card">
+					<div class="avatar" th:if="${userProfile.profilePicUrl == null}" th:text="${userProfile.initials}">PW</div>
+					<img class="avatar-img" th:if="${userProfile.profilePicUrl != null}" th:src="${userProfile.profilePicUrl}" alt="Profile photo">
+					<div class="user-meta">
+						<strong th:text="${userProfile.fullName}">User Name</strong>
+						<span th:text="${userProfile.role}">Staff</span>
+						<small th:text="${userProfile.position} + ' • ' + ${userProfile.department}">Role • Department</small>
+					</div>
+				</div>
+				<a class="pill ghost signout-link" href="/logout" data-signout-trigger>
+					<span class="signout-icon" aria-hidden="true">
+						<svg viewBox="0 0 24 24">
+							<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+							<path d="M10 17l5-5-5-5"/>
+							<path d="M15 12H3"/>
+						</svg>
+					</span>
+					Sign out
+				</a>
+			</div>
 		</aside>
 
 		<main class="main">
@@ -400,5 +421,16 @@
 			</p>
 		</main>
 	</div>
+	<div class="modal-backdrop" id="signout-modal" aria-hidden="true">
+		<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="signout-title">
+			<h4 id="signout-title">Sign out</h4>
+			<p>Are you sure you want to sign out?</p>
+			<div class="modal-actions">
+				<button class="modal-btn" type="button" data-signout-cancel>Cancel</button>
+				<button class="modal-btn primary" type="button" data-signout-confirm>Sign out</button>
+			</div>
+		</div>
+	</div>
+	<script src="/js/signout.js"></script>
 </body>
 </html>
