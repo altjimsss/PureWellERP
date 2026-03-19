@@ -6,6 +6,7 @@ import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -31,6 +32,31 @@ public class HrmController {
 		model.addAttribute("siteTitle", "Human Resource Management Module");
 		model.addAttribute("moduleName", "Human Resource Management");
 		model.addAttribute("userProfile", userProfile);
+		try {
+			LocalDate attendanceDate = loadAttendanceDate();
+			model.addAttribute("attendanceDate", attendanceDate);
+			model.addAttribute("snapshot", loadSnapshot(attendanceDate));
+			model.addAttribute("recentEmployees", loadRecentEmployees());
+			model.addAttribute("departments", loadDepartments());
+			model.addAttribute("positions", loadPositions());
+			model.addAttribute("attendanceToday", loadAttendanceToday(attendanceDate));
+			model.addAttribute("attendanceSummary", loadAttendanceSummary(attendanceDate));
+			model.addAttribute("payrollBasics", loadPayrollBasics());
+			model.addAttribute("payrollFeatures", payrollFeatures());
+			model.addAttribute("dbAvailable", true);
+		} catch (DataAccessException ex) {
+			LocalDate fallbackDate = LocalDate.now();
+			model.addAttribute("attendanceDate", fallbackDate);
+			model.addAttribute("snapshot", HrmSnapshot.empty());
+			model.addAttribute("recentEmployees", List.of());
+			model.addAttribute("departments", List.of());
+			model.addAttribute("positions", List.of());
+			model.addAttribute("attendanceToday", List.of());
+			model.addAttribute("attendanceSummary", AttendanceSummary.empty());
+			model.addAttribute("payrollBasics", PayrollBasics.empty());
+			model.addAttribute("payrollFeatures", payrollFeatures());
+			model.addAttribute("dbAvailable", false);
+		}
 		return "hrm-module";
 	}
 

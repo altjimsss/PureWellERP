@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -21,14 +22,45 @@ public class ProcurementController {
 	}
 
 	@GetMapping("/modules/procurement")
-	public String procurementModule(Model model, HttpSession session) {
+	public String procurementModule(
+			Model model,
+			HttpSession session,
+			@RequestParam(name = "suppliersView", defaultValue = "recent") String suppliersView,
+			@RequestParam(name = "poPeriod", defaultValue = "30") String poPeriod,
+			@RequestParam(name = "poView", defaultValue = "recent") String poView,
+			@RequestParam(name = "inventoryView", defaultValue = "low") String inventoryView
+	) {
 		UserProfile userProfile = SessionUtil.getUser(session);
 		if (userProfile == null) {
 			return "redirect:/login";
 		}
 		model.addAttribute("siteTitle", "Procurement and Inventory Module");
 		model.addAttribute("moduleName", "Procurement and Inventory");
+		model.addAttribute("moduleSubtitle", "Suppliers, purchase orders, and inventory tracking");
 		model.addAttribute("userProfile", userProfile);
+		model.addAttribute("suppliersView", suppliersView);
+		model.addAttribute("poPeriod", poPeriod);
+		model.addAttribute("poView", poView);
+		model.addAttribute("inventoryView", inventoryView);
+		try {
+			Integer poDays = parseDaysPeriod(poPeriod, 30);
+			boolean poAll = isViewAll(poView);
+			boolean suppliersAll = isViewAll(suppliersView);
+			Integer suppliersLimit = suppliersAll ? null : 6;
+			Integer ordersLimit = poAll ? null : 6;
+
+			model.addAttribute("snapshot", loadSnapshot());
+			model.addAttribute("suppliers", loadSuppliers(suppliersLimit));
+			model.addAttribute("purchaseOrders", loadPurchaseOrders(poDays, ordersLimit));
+			model.addAttribute("inventoryItems", loadInventoryItems(inventoryView));
+			model.addAttribute("dbAvailable", true);
+		} catch (DataAccessException ex) {
+			model.addAttribute("snapshot", ProcurementSnapshot.empty());
+			model.addAttribute("suppliers", List.of());
+			model.addAttribute("purchaseOrders", List.of());
+			model.addAttribute("inventoryItems", List.of());
+			model.addAttribute("dbAvailable", false);
+		}
 		return "procurement-module";
 	}
 

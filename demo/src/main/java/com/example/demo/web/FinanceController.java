@@ -17,6 +17,7 @@ import com.lowagie.text.pdf.PdfWriter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,7 +34,16 @@ public class FinanceController {
 	}
 
 	@GetMapping("/modules/finance")
-	public String financeModule(Model model, HttpSession session) {
+	public String financeModule(
+			Model model,
+			HttpSession session,
+			@RequestParam(name = "expensesPeriod", defaultValue = "30") String expensesPeriod,
+			@RequestParam(name = "expensesView", defaultValue = "recent") String expensesView,
+			@RequestParam(name = "recordsPeriod", defaultValue = "30") String recordsPeriod,
+			@RequestParam(name = "recordsView", defaultValue = "recent") String recordsView,
+			@RequestParam(name = "reportsPeriod", defaultValue = "6") String reportsPeriod,
+			@RequestParam(name = "mixPeriod", defaultValue = "30") String mixPeriod
+	) {
 		UserProfile userProfile = SessionUtil.getUser(session);
 		if (userProfile == null) {
 			return "redirect:/login";
@@ -41,6 +51,36 @@ public class FinanceController {
 		model.addAttribute("siteTitle", "Finance and Accounting Module");
 		model.addAttribute("moduleName", "Finance and Accounting");
 		model.addAttribute("userProfile", userProfile);
+		model.addAttribute("expensesPeriod", expensesPeriod);
+		model.addAttribute("expensesView", expensesView);
+		model.addAttribute("recordsPeriod", recordsPeriod);
+		model.addAttribute("recordsView", recordsView);
+		model.addAttribute("reportsPeriod", reportsPeriod);
+		model.addAttribute("mixPeriod", mixPeriod);
+		try {
+			Integer expensesDays = parseDaysPeriod(expensesPeriod, 30);
+			Integer recordsDays = parseDaysPeriod(recordsPeriod, 30);
+			Integer mixDays = parseDaysPeriod(mixPeriod, 30);
+			boolean expensesAll = isViewAll(expensesView);
+			boolean recordsAll = isViewAll(recordsView);
+			int reportsMonths = parseMonthsPeriod(reportsPeriod);
+
+			model.addAttribute("snapshot", loadSnapshot());
+			model.addAttribute("insights", loadInsights());
+			model.addAttribute("recentExpenses", loadRecentExpenses(expensesDays, expensesAll ? null : 6));
+			model.addAttribute("recentRecords", loadRecentRecords(recordsDays, recordsAll ? null : 6));
+			model.addAttribute("monthlyReports", loadMonthlyReports(reportsMonths));
+			model.addAttribute("expenseBreakdown", loadExpenseBreakdown(mixDays));
+			model.addAttribute("dbAvailable", true);
+		} catch (DataAccessException ex) {
+			model.addAttribute("snapshot", FinanceSnapshot.empty());
+			model.addAttribute("insights", FinanceInsights.empty());
+			model.addAttribute("recentExpenses", List.of());
+			model.addAttribute("recentRecords", List.of());
+			model.addAttribute("monthlyReports", List.of());
+			model.addAttribute("expenseBreakdown", List.of());
+			model.addAttribute("dbAvailable", false);
+		}
 		return "finance-module";
 	}
 
