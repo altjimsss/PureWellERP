@@ -71,7 +71,7 @@
 					<div class="user-meta">
 						<strong th:text="${userProfile.fullName}">User Name</strong>
 						<span th:text="${userProfile.role}">Staff</span>
-						<small th:text="${userProfile.position} + ' • ' + ${userProfile.department}">Role • Department</small>
+						<small th:text="${userProfile.position + ' • ' + userProfile.department}">Role • Department</small>
 					</div>
 				</div>
 				<a class="pill ghost signout-link" href="/logout" data-signout-trigger>
