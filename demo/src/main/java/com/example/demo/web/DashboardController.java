@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.List;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
@@ -20,9 +21,14 @@ public class DashboardController {
 	}
 
 	@GetMapping("/")
-	public String dashboard(Model model) {
+	public String dashboard(Model model, HttpSession session) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
 		model.addAttribute("siteTitle", "PureWell Refilling Station ERP");
 		model.addAttribute("today", LocalDate.now());
+		model.addAttribute("userProfile", userProfile);
 		try {
 			DashboardStats stats = loadStats();
 			model.addAttribute("stats", stats);
