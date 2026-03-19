@@ -92,6 +92,8 @@ body {
 	position: sticky;
 	top: 0;
 	height: 100vh;
+	display: flex;
+	flex-direction: column;
 }
 
 .logo-wrap {
@@ -385,6 +387,143 @@ th {
 	margin-top: 32px;
 	color: var(--text-dim);
 	font-size: 0.85rem;
+}
+
+.sidebar-footer {
+	margin-top: auto;
+	padding: 16px 12px;
+	border-top: 1px solid rgba(0, 0, 0, 0.06);
+	display: grid;
+	gap: 10px;
+}
+
+.user-card {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.avatar {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	background: #e7f0f8;
+	color: #3b4a62;
+	display: grid;
+	place-items: center;
+	font-weight: 700;
+}
+
+.avatar-img {
+	width: 44px;
+	height: 44px;
+	border-radius: 50%;
+	object-fit: cover;
+	border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.user-meta strong {
+	display: block;
+	font-size: 0.95rem;
+}
+
+.user-meta span {
+	display: block;
+	font-size: 0.8rem;
+	color: var(--text-dim);
+}
+
+.user-meta small {
+	display: block;
+	font-size: 0.75rem;
+	color: var(--text-dim);
+}
+
+.signout-link {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	text-decoration: none;
+}
+
+.signout-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 18px;
+	height: 18px;
+	color: currentColor;
+}
+
+.signout-icon svg {
+	width: 18px;
+	height: 18px;
+	stroke: currentColor;
+	fill: none;
+	stroke-width: 1.8;
+}
+
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.3);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 0.2s ease;
+	z-index: 50;
+}
+
+.modal-backdrop.is-visible {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.modal-card {
+	background: #ffffff;
+	border-radius: 18px;
+	padding: 20px 22px;
+	box-shadow: 0 24px 60px rgba(20, 40, 60, 0.18);
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	max-width: 360px;
+	width: calc(100% - 32px);
+	display: grid;
+	gap: 14px;
+}
+
+.modal-card h4 {
+	margin: 0;
+	font-size: 1.1rem;
+}
+
+.modal-card p {
+	margin: 0;
+	color: var(--text-dim);
+	font-size: 0.92rem;
+}
+
+.modal-actions {
+	display: flex;
+	gap: 10px;
+	justify-content: flex-end;
+}
+
+.modal-btn {
+	padding: 8px 14px;
+	border-radius: 999px;
+	border: 1px solid rgba(0, 0, 0, 0.12);
+	background: #f7fbff;
+	color: var(--text-main);
+	font-weight: 600;
+	cursor: pointer;
+}
+
+.modal-btn.primary {
+	border: none;
+	background: #3aa4e0;
+	color: #ffffff;
 }
 
 @media (max-width: 720px) {

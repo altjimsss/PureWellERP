@@ -1,12 +1,6 @@
 package com.example.demo.web;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import org.springframework.dao.DataAccessException;
-import org.springframework.jdbc.core.JdbcTemplate;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,33 +17,14 @@ public class HrmController {
 	}
 
 	@GetMapping("/modules/hrm")
-	public String hrmModule(Model model) {
+	public String hrmModule(Model model, HttpSession session) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
 		model.addAttribute("siteTitle", "Human Resource Management Module");
 		model.addAttribute("moduleName", "Human Resource Management");
-		try {
-			LocalDate attendanceDate = loadAttendanceDate();
-			model.addAttribute("attendanceDate", attendanceDate);
-			model.addAttribute("snapshot", loadSnapshot(attendanceDate));
-			model.addAttribute("recentEmployees", loadRecentEmployees());
-			model.addAttribute("departments", loadDepartments());
-			model.addAttribute("positions", loadPositions());
-			model.addAttribute("attendanceToday", loadAttendanceToday(attendanceDate));
-			model.addAttribute("attendanceSummary", loadAttendanceSummary(attendanceDate));
-			model.addAttribute("payrollBasics", loadPayrollBasics());
-			model.addAttribute("payrollFeatures", payrollFeatures());
-			model.addAttribute("dbAvailable", true);
-		} catch (DataAccessException ex) {
-			model.addAttribute("attendanceDate", LocalDate.now());
-			model.addAttribute("snapshot", HrmSnapshot.empty());
-			model.addAttribute("recentEmployees", List.of());
-			model.addAttribute("departments", List.of());
-			model.addAttribute("positions", List.of());
-			model.addAttribute("attendanceToday", List.of());
-			model.addAttribute("attendanceSummary", AttendanceSummary.empty());
-			model.addAttribute("payrollBasics", PayrollBasics.empty());
-			model.addAttribute("payrollFeatures", payrollFeatures());
-			model.addAttribute("dbAvailable", false);
-		}
+		model.addAttribute("userProfile", userProfile);
 		return "hrm-module";
 	}
 
