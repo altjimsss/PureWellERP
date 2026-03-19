@@ -1,1 +1,637 @@
+.panel-actions a.pill {
+	text-decoration: none;
+}
 
+.icon-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.icon-only {
+	padding: 8px 10px;
+}
+
+.icon-only .pill-icon {
+	margin: 0;
+}
+
+.pill-icon {
+	width: 18px;
+	height: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #4e6a86;
+}
+
+.pill-icon svg {
+	width: 18px;
+	height: 18px;
+	stroke: currentColor;
+	fill: none;
+	stroke-width: 1.8;
+}
+
+.subtle {
+	margin: 4px 0 0;
+	color: #6b7280;
+	font-size: 0.9rem;
+}
+
+.db-alert {
+	padding: 12px 16px;
+	border-radius: 12px;
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	color: #6b7280;
+	font-size: 0.9rem;
+	margin-bottom: 16px;
+}
+
+.hrm-grid {
+	margin-top: 8px;
+	min-width: 0;
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.hrm-card {
+	border-radius: 16px;
+	padding: 16px;
+	border: 1px solid #e5e7eb;
+	background: #ffffff;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	min-width: 0;
+	grid-column: span 6;
+}
+
+.hrm-card:hover {
+	transform: translateY(-4px);
+	border-color: #d1d5db;
+	box-shadow: 0 16px 32px rgba(60, 90, 150, 0.12);
+}
+
+.summary-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.summary-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 12px;
+	border-radius: 12px;
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	font-size: 0.9rem;
+}
+
+.table-actions {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 12px;
+	flex-wrap: wrap;
+}
+
+.table-actions.compact-filters {
+	align-items: center;
+}
+
+.filter-search {
+	flex: 1 1 260px;
+}
+
+.filter-menu {
+	position: relative;
+}
+
+.filter-menu summary {
+	list-style: none;
+	cursor: pointer;
+}
+
+.filter-menu summary::-webkit-details-marker {
+	display: none;
+}
+
+.filter-panel {
+	position: absolute;
+	right: 0;
+	top: calc(100% + 8px);
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	box-shadow: none;
+	border-radius: 14px;
+	padding: 12px;
+	display: grid;
+	gap: 10px;
+	min-width: 220px;
+	z-index: 5;
+}
+
+.input-field {
+	display: grid;
+	gap: 6px;
+	font-size: 0.8rem;
+	color: #6b7280;
+}
+
+.input-field input {
+	padding: 8px 12px;
+	border-radius: 10px;
+	border: 1px solid #e5e7eb;
+	background: #ffffff;
+	min-height: 38px;
+	line-height: 1.2;
+}
+
+.input-field input:focus,
+.input-field select:focus,
+.form-grid input:focus,
+.form-grid select:focus {
+	outline: 2px solid rgba(17, 24, 39, 0.08);
+	outline-offset: 2px;
+	border-color: #d1d5db;
+}
+
+.search-input {
+	padding-left: 34px;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7c8f' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cline x1='16.65' y1='16.65' x2='21' y2='21'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: 12px center;
+	background-size: 14px 14px;
+}
+
+.input-field select {
+	padding: 8px 12px;
+	border-radius: 10px;
+	border: 1px solid #e5e7eb;
+	background: #ffffff;
+	width: 100%;
+	min-height: 38px;
+	line-height: 1.2;
+}
+
+.meta-note {
+	font-size: 0.8rem;
+	color: #6b7280;
+}
+
+.table-scroll {
+	max-height: 320px;
+	overflow: auto;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+}
+
+.table-scroll table {
+	border-collapse: collapse;
+}
+
+.table-scroll thead th {
+	position: sticky;
+	top: 0;
+	background: #ffffff;
+	z-index: 1;
+}
+
+.table-scroll::-webkit-scrollbar {
+	height: 8px;
+	width: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb {
+	background: #d1d5db;
+	border-radius: 999px;
+}
+
+.table-scroll::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+table {
+	table-layout: fixed;
+	word-break: break-word;
+}
+
+th,
+td {
+	overflow-wrap: anywhere;
+	padding: 10px 8px;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+thead th {
+	background: #f9fafb;
+	font-size: 0.75rem;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #6b7280;
+	position: sticky;
+	top: 0;
+	z-index: 1;
+}
+
+.action-col {
+	width: 70px;
+	text-align: center;
+}
+
+tbody td:last-child {
+	text-align: center;
+}
+
+tbody tr:hover {
+	background: #f9fafb;
+}
+
+.employee-form {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 10px;
+	margin-top: 10px;
+	padding: 12px;
+	border: 1px solid #e5e7eb;
+	border-radius: 12px;
+	background: #ffffff;
+}
+
+.employee-form label {
+	display: grid;
+	gap: 6px;
+	font-size: 0.78rem;
+	color: #6b7280;
+}
+
+.employee-form input {
+	padding: 8px 10px;
+	border-radius: 10px;
+	border: 1px solid #e5e7eb;
+	background: #ffffff;
+	min-height: 38px;
+	line-height: 1.2;
+}
+
+.employee-form .pill {
+	align-self: end;
+	justify-self: start;
+}
+
+.employee-add {
+	margin-bottom: 12px;
+}
+
+.employee-add summary {
+	list-style: none;
+	cursor: pointer;
+}
+
+.employee-add summary::-webkit-details-marker {
+	display: none;
+}
+
+.inline-form {
+	margin: 0;
+}
+
+.icon-btn {
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	border: 1px solid #e5e7eb;
+	background: #ffffff;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.icon-btn svg {
+	width: 16px;
+	height: 16px;
+	stroke: #6b7280;
+	fill: none;
+	stroke-width: 1.8;
+}
+
+.icon-btn:hover {
+	transform: translateY(-2px);
+	border-color: #d1d5db;
+	box-shadow: 0 8px 16px rgba(17, 24, 39, 0.08);
+}
+
+.main .pill {
+	padding: 8px 14px;
+	border-radius: 999px;
+	background: #f3f4f6;
+	color: #111827;
+	border: 1px solid #e5e7eb;
+	font-weight: 600;
+	font-size: 0.78rem;
+	text-decoration: none;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.main .pill.ghost {
+	background: #f3f4f6;
+	color: #111827;
+	border: 1px solid #e5e7eb;
+}
+
+.main .pill:hover {
+	background: #f9fafb;
+	border-color: #d1d5db;
+	transform: translateY(-2px);
+	box-shadow: 0 8px 16px rgba(17, 24, 39, 0.08);
+}
+
+.filter-menu summary:hover {
+	background: #f9fafb;
+	border-radius: 999px;
+}
+
+.form-grid button.pill {
+	justify-self: start;
+}
+
+@media (max-width: 1100px) {
+	.hrm-card,
+	.span-4,
+	.span-5,
+	.span-7,
+	.span-8,
+	.span-12 {
+		grid-column: span 12;
+	}
+
+	.stat-row {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+
+	.payroll-widget,
+	.payroll-widget.span-6,
+	.payroll-widget.span-12 {
+		grid-column: span 12;
+	}
+
+	.form-grid,
+	.form-grid.wide {
+		grid-template-columns: 1fr;
+	}
+
+	.payroll-grid {
+		grid-column: span 12;
+	}
+
+	.employee-form {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 800px) {
+	.panel-header {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.summary-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.stat-row {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	.filter-panel {
+		right: auto;
+		left: 0;
+	}
+
+	.employee-form {
+		grid-template-columns: 1fr;
+	}
+}
+
+@media (max-width: 720px) {
+	.stat-row {
+		grid-template-columns: 1fr;
+	}
+}
+.span-4 {
+	grid-column: span 4;
+}
+
+.span-5 {
+	grid-column: span 5;
+}
+
+.span-7 {
+	grid-column: span 7;
+}
+
+.span-8 {
+	grid-column: span 8;
+}
+
+.span-12 {
+	grid-column: span 12;
+}
+
+.span-6 {
+	grid-column: span 6;
+}
+
+.stat-row {
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.stat-card {
+	border-radius: 14px;
+	padding: 14px 16px;
+	border: 1px solid #e5e7eb;
+	background: #ffffff;
+	box-shadow: none;
+}
+
+.stat-card p {
+	color: #6b7280;
+}
+
+.stat-note.up,
+.stat-note.down {
+	color: #6b7280;
+	background: transparent;
+}
+
+.payroll-grid {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	gap: 16px;
+	grid-column: span 12;
+}
+
+.payroll-widget {
+	border-radius: 14px;
+	padding: 14px;
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	display: grid;
+	gap: 12px;
+}
+
+.payroll-widget h5 {
+	margin: 0;
+	font-size: 0.85rem;
+	text-transform: uppercase;
+	letter-spacing: 0.6px;
+	color: #6b7280;
+}
+
+.snapshot-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.snapshot-grid span {
+	display: block;
+	font-size: 0.75rem;
+	color: #6b7280;
+	margin-bottom: 4px;
+}
+
+.form-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.form-grid.wide {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.form-grid label {
+	display: grid;
+	gap: 6px;
+	font-size: 0.8rem;
+	color: #6b7280;
+}
+
+.form-grid input,
+.form-grid select {
+	padding: 8px 10px;
+	border-radius: 10px;
+	border: 1px solid #e5e7eb;
+	background: #ffffff;
+	min-height: 38px;
+	line-height: 1.2;
+}
+
+.form-grid button {
+	border: none;
+	cursor: pointer;
+	align-self: end;
+}
+
+#payrollProcess .pill {
+	margin-left: 8px;
+}
+
+.payroll-widget.span-4 .form-grid.wide {
+	grid-template-columns: 1fr;
+}
+
+.calc-results {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.calc-results span {
+	display: block;
+	font-size: 0.75rem;
+	color: #6b7280;
+	margin-bottom: 4px;
+}
+
+.record-stats {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.record-stats span {
+	display: block;
+	font-size: 0.75rem;
+	color: #6b7280;
+	margin-bottom: 4px;
+}
+
+.benefits-list {
+	display: grid;
+	gap: 10px;
+}
+
+.benefit-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px;
+	border-radius: 10px;
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+}
+
+.benefit-row .tag {
+	font-size: 0.7rem;
+}
+
+.benefit-row button {
+	border: none;
+	background: transparent;
+	color: var(--danger);
+	cursor: pointer;
+	font-size: 0.75rem;
+}
+
+.benefits-total {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+}
+
+.benefits-total span {
+	display: block;
+	font-size: 0.75rem;
+	color: #6b7280;
+	margin-bottom: 4px;
+}
+
+.payroll-widget.span-6 {
+	grid-column: span 6;
+}
+
+.payroll-widget.span-12 {
+	grid-column: span 12;
+}
+
+.payroll-widget.span-4 {
+	grid-column: span 4;
+}
+
+
+@media (max-width: 800px) {
+	.table-actions {
+		flex-direction: column;
+		align-items: flex-start;
+	}
+}
