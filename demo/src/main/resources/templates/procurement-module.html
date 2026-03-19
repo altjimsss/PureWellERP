@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title th:text="${siteTitle}">Procurement Module</title>
 	<link rel="stylesheet" href="/css/base.css">
+	<link rel="stylesheet" href="/css/dashboard.css">
 	<link rel="stylesheet" href="/css/procurement.css">
 </head>
 <body>
@@ -88,23 +89,240 @@
 		</aside>
 
 		<main class="main">
-			<header class="topbar">
-				<div class="brand">
-					<h1 th:text="${moduleName}">Procurement and Inventory</h1>
-					<span>Suppliers, purchase orders, and inventory tracking</span>
+			<div class="panel-header">
+				<div>
+					<h2 th:text="${moduleName}">Procurement and Inventory</h2>
+					<p class="subtle" th:text="${moduleSubtitle}">Suppliers, purchase orders, and inventory tracking</p>
 				</div>
-				<a class="pill" href="/">Back to Dashboard</a>
-			</header>
+				<div class="panel-actions">
+					<span class="pill">Procurement</span>
+					<a class="pill ghost icon-pill icon-only" href="/" aria-label="Back to Dashboard">
+						<span class="pill-icon">
+							<svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+						</span>
+					</a>
+				</div>
+			</div>
 
-			<h2 class="section-title">Coming Soon</h2>
-			<div class="section-card">
-				<p>
-					This module is reserved for procurement and inventory. Add suppliers, PO tracking, and stock levels here.
-				</p>
+			<div class="db-alert" th:if="${dbAvailable == false}">
+				<strong>Database offline.</strong> Showing placeholders instead of live procurement data.
+			</div>
+
+			<div class="stat-row">
+				<div class="stat-card">
+					<p>Suppliers</p>
+					<h3 th:text="${snapshot.supplierCount}">0</h3>
+					<div class="stat-note up">Active partners</div>
+				</div>
+				<div class="stat-card">
+					<p>Products</p>
+					<h3 th:text="${snapshot.productCount}">0</h3>
+					<div class="stat-note up">Tracked items</div>
+				</div>
+				<div class="stat-card">
+					<p>Purchase Orders</p>
+					<h3 th:text="${snapshot.poCount}">0</h3>
+					<div class="stat-note up">All time</div>
+				</div>
+				<div class="stat-card">
+					<p>Pending Orders</p>
+					<h3 th:text="${snapshot.pendingPoCount}">0</h3>
+					<div class="stat-note down">Awaiting delivery</div>
+				</div>
+				<div class="stat-card">
+					<p>Low Stock</p>
+					<h3 th:text="${snapshot.lowStockCount}">0</h3>
+					<div class="stat-note down">Below 50 units</div>
+				</div>
+			</div>
+
+			<div class="grid-core procurement-grid">
+				<section class="procurement-card span-5">
+					<div class="card-head">
+						<h4>Supplier Management</h4>
+						<form class="filter-form" method="get" action="/modules/procurement">
+							<input type="hidden" name="poPeriod" th:value="${poPeriod}">
+							<input type="hidden" name="poView" th:value="${poView}">
+							<input type="hidden" name="inventoryView" th:value="${inventoryView}">
+							<select name="suppliersView">
+								<option value="recent" th:selected="${suppliersView == 'recent'}">Latest 12</option>
+								<option value="all" th:selected="${suppliersView == 'all'}">View all</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+					<form class="inline-form add-form" method="post" action="/modules/procurement/suppliers">
+						<input type="text" name="name" placeholder="Supplier name" required>
+						<input type="text" name="contact" placeholder="Contact" required>
+						<input type="text" name="address" placeholder="Address" required>
+						<button class="pill" type="submit">Add</button>
+					</form>
+					<div class="table-scroll">
+						<table>
+							<thead>
+								<tr>
+									<th>Name</th>
+									<th>Contact</th>
+									<th>Address</th>
+									<th class="action-col">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="supplier : ${suppliers}">
+									<td th:text="${supplier.name}">Supplier</td>
+									<td th:text="${supplier.contact}">Contact</td>
+									<td th:text="${supplier.address}">Address</td>
+									<td>
+										<form class="inline-form" method="post" action="/modules/procurement/suppliers/delete">
+											<input type="hidden" name="supplierId" th:value="${supplier.id}">
+											<button class="icon-btn" type="submit" aria-label="Remove supplier">
+												<svg viewBox="0 0 24 24" aria-hidden="true">
+													<path d="M4 7h16"/>
+													<path d="M9 7V5h6v2"/>
+													<path d="M9 11v6"/>
+													<path d="M15 11v6"/>
+													<path d="M6 7l1 13h10l1-13"/>
+												</svg>
+											</button>
+										</form>
+									</td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(suppliers)}">
+									<td colspan="4">No suppliers yet.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<section class="procurement-card span-7">
+					<div class="card-head">
+						<h4>Purchase Orders</h4>
+						<form class="filter-form" method="get" action="/modules/procurement">
+							<input type="hidden" name="suppliersView" th:value="${suppliersView}">
+							<input type="hidden" name="inventoryView" th:value="${inventoryView}">
+							<select name="poPeriod">
+								<option value="7" th:selected="${poPeriod == '7'}">Last 7 days</option>
+								<option value="30" th:selected="${poPeriod == '30'}">Last 30 days</option>
+								<option value="90" th:selected="${poPeriod == '90'}">Last 90 days</option>
+								<option value="all" th:selected="${poPeriod == 'all'}">All time</option>
+							</select>
+							<select name="poView">
+								<option value="recent" th:selected="${poView == 'recent'}">Latest 12</option>
+								<option value="all" th:selected="${poView == 'all'}">View all</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+					<div class="table-scroll">
+						<table>
+							<thead>
+								<tr>
+									<th>Supplier</th>
+									<th>Product</th>
+									<th>Qty</th>
+									<th>Date</th>
+									<th>Status</th>
+									<th class="action-col">Update</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="po : ${purchaseOrders}">
+									<td th:text="${po.supplierName}">Supplier</td>
+									<td th:text="${po.productName}">Product</td>
+									<td th:text="${po.quantity}">0</td>
+									<td th:text="${po.orderDate}">2026-03-10</td>
+									<td>
+										<span class="tag" th:classappend="${po.status == 'Delivered'} ? ' good' : ' warn'"
+											th:text="${po.status}">Pending</span>
+									</td>
+									<td>
+										<form class="inline-form status-form" method="post" action="/modules/procurement/purchase-orders/status">
+											<input type="hidden" name="orderId" th:value="${po.id}">
+											<select name="status">
+												<option value="Pending" th:selected="${po.status == 'Pending'}">Pending</option>
+												<option value="Delivered" th:selected="${po.status == 'Delivered'}">Delivered</option>
+												<option value="Cancelled" th:selected="${po.status == 'Cancelled'}">Cancelled</option>
+											</select>
+											<button class="pill ghost" type="submit">Save</button>
+										</form>
+									</td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(purchaseOrders)}">
+									<td colspan="6">No purchase orders yet.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
+
+				<section class="procurement-card span-12">
+					<div class="card-head">
+						<h4>Inventory Tracking</h4>
+						<form class="filter-form" method="get" action="/modules/procurement">
+							<input type="hidden" name="suppliersView" th:value="${suppliersView}">
+							<input type="hidden" name="poPeriod" th:value="${poPeriod}">
+							<input type="hidden" name="poView" th:value="${poView}">
+							<select name="inventoryView">
+								<option value="low" th:selected="${inventoryView == 'low'}">Low stock</option>
+								<option value="all" th:selected="${inventoryView == 'all'}">View all</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+					<form class="inline-form add-form" method="post" action="/modules/procurement/products">
+						<input type="text" name="name" placeholder="Product name" required>
+						<input type="text" name="type" placeholder="Type" required>
+						<input type="number" name="stock" placeholder="Stock" min="0" required>
+						<input type="number" name="price" placeholder="Price" step="0.01" min="0" required>
+						<input type="number" name="supplierId" placeholder="Supplier ID">
+						<button class="pill" type="submit">Add</button>
+					</form>
+					<div class="table-scroll">
+						<table>
+							<thead>
+								<tr>
+									<th>Product</th>
+									<th>Type</th>
+									<th>Stock</th>
+									<th>Price</th>
+									<th>Supplier</th>
+									<th class="action-col">Action</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="item : ${inventoryItems}">
+									<td th:text="${item.name}">Product</td>
+									<td th:text="${item.type}">Type</td>
+									<td th:text="${item.stock}">0</td>
+									<td class="mono" th:text="${#numbers.formatDecimal(item.price,1,2)}">0.00</td>
+									<td th:text="${item.supplierName}">Supplier</td>
+									<td>
+										<form class="inline-form" method="post" action="/modules/procurement/products/delete">
+											<input type="hidden" name="productId" th:value="${item.id}">
+											<button class="icon-btn" type="submit" aria-label="Remove product">
+												<svg viewBox="0 0 24 24" aria-hidden="true">
+													<path d="M4 7h16"/>
+													<path d="M9 7V5h6v2"/>
+													<path d="M9 11v6"/>
+													<path d="M15 11v6"/>
+													<path d="M6 7l1 13h10l1-13"/>
+												</svg>
+											</button>
+										</form>
+									</td>
+								</tr>
+								<tr th:if="${#lists.isEmpty(inventoryItems)}">
+									<td colspan="6">No inventory items yet.</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</section>
 			</div>
 
 			<p class="footer-note">
-				This placeholder keeps the route live while the module is under development.
+				Procurement module data is pulled directly from the database tables for suppliers, purchase orders, and products.
 			</p>
 		</main>
 	</div>
