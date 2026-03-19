@@ -5,6 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title th:text="${siteTitle}">Finance Module</title>
 	<link rel="stylesheet" href="/css/base.css">
+	<link rel="stylesheet" href="/css/dashboard.css">
 	<link rel="stylesheet" href="/css/finance.css">
 </head>
 <body>
@@ -43,7 +44,7 @@
 						</span>
 						Finance & Accounting
 					</span>
-					<span class="tag warn">Soon</span>
+					<span class="tag good">Live</span>
 				</a>
 				<a href="/modules/procurement">
 					<span class="label">
@@ -64,28 +65,372 @@
 					<span class="tag warn">Soon</span>
 				</a>
 			</nav>
+			<div class="sidebar-footer" th:if="${userProfile != null}">
+				<div class="user-card">
+					<div class="avatar" th:if="${userProfile.profilePicUrl == null}" th:text="${userProfile.initials}">PW</div>
+					<img class="avatar-img" th:if="${userProfile.profilePicUrl != null}" th:src="${userProfile.profilePicUrl}" alt="Profile photo">
+					<div class="user-meta">
+						<strong th:text="${userProfile.fullName}">User Name</strong>
+						<span th:text="${userProfile.role}">Staff</span>
+						<small th:text="${userProfile.position} + ' • ' + ${userProfile.department}">Role • Department</small>
+					</div>
+				</div>
+				<a class="pill ghost signout-link" href="/logout" data-signout-trigger>
+					<span class="signout-icon" aria-hidden="true">
+						<svg viewBox="0 0 24 24">
+							<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+							<path d="M10 17l5-5-5-5"/>
+							<path d="M15 12H3"/>
+						</svg>
+					</span>
+					Sign out
+				</a>
+			</div>
 		</aside>
 
 		<main class="main">
-			<header class="topbar">
-				<div class="brand">
-					<h1 th:text="${moduleName}">Finance and Accounting</h1>
-					<span>Financial records, expense tracking, and reports</span>
+			<div class="panel-header">
+				<div>
+					<h2 th:text="${moduleName}">Finance and Accounting</h2>
+					<p class="subtle">Financial records, expense tracking, and reports -
+						<span th:text="${snapshot.periodLabel}">Last 30 days</span>
+					</p>
 				</div>
-				<a class="pill" href="/">Back to Dashboard</a>
-			</header>
+				<div class="panel-actions">
+					<span class="pill">Finance</span>
+					<details class="download-menu">
+						<summary class="pill ghost icon-pill icon-only" aria-label="Download report">
+							<span class="pill-icon">
+								<svg viewBox="0 0 24 24"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><path d="M4 17v3h16v-3"/></svg>
+							</span>
+						</summary>
+						<form class="download-form" method="get" action="/modules/finance/report">
+							<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
+							<input type="hidden" name="expensesView" th:value="${expensesView}">
+							<input type="hidden" name="recordsPeriod" th:value="${recordsPeriod}">
+							<input type="hidden" name="recordsView" th:value="${recordsView}">
+							<input type="hidden" name="reportsPeriod" th:value="${reportsPeriod}">
+							<label class="download-label">Format</label>
+							<select name="format">
+								<option value="csv">CSV</option>
+								<option value="xlsx">Excel (.xlsx)</option>
+								<option value="pdf">PDF</option>
+							</select>
+							<label class="download-label">Include</label>
+							<div class="download-options">
+								<label><input type="checkbox" name="include" value="snapshot" checked> Snapshot</label>
+								<label><input type="checkbox" name="include" value="insights" checked> Insights</label>
+								<label><input type="checkbox" name="include" value="expenses" checked> Expenses</label>
+								<label><input type="checkbox" name="include" value="records" checked> Records</label>
+								<label><input type="checkbox" name="include" value="reports" checked> Reports</label>
+							</div>
+							<button class="pill" type="submit">Download</button>
+						</form>
+					</details>
+					<a class="pill ghost icon-pill icon-only" href="/" aria-label="Back to Dashboard">
+						<span class="pill-icon">
+							<svg viewBox="0 0 24 24"><path d="M4 10.5L12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z"/></svg>
+						</span>
+					</a>
+				</div>
+			</div>
 
-			<h2 class="section-title">Coming Soon</h2>
-			<div class="section-card">
-				<p>
-					This module is reserved for finance workflows. Add financial records, expenses, and reports here.
-				</p>
+			<div class="db-alert" th:if="${dbAvailable == false}">
+				<strong>Database offline.</strong> Showing placeholders instead of live finance data.
+			</div>
+
+			<div class="stat-row">
+				<div class="stat-card">
+					<p>Total Revenue</p>
+					<h3 class="mono" th:text="${#numbers.formatDecimal(snapshot.totalRevenue,1,2)}">0.00</h3>
+					<div class="stat-note up" th:text="${snapshot.periodLabel}">Last 30 days</div>
+				</div>
+				<div class="stat-card">
+					<p>Total Expenses</p>
+					<h3 class="mono" th:text="${#numbers.formatDecimal(snapshot.totalExpenses,1,2)}">0.00</h3>
+					<div class="stat-note down" th:text="${snapshot.periodLabel}">Last 30 days</div>
+				</div>
+				<div class="stat-card">
+					<p>Net Income</p>
+					<h3 class="mono" th:text="${#numbers.formatDecimal(snapshot.netIncome,1,2)}">0.00</h3>
+					<div class="stat-note up">Revenue minus expenses</div>
+				</div>
+				<div class="stat-card">
+					<p>Average Daily Expense</p>
+					<h3 class="mono" th:text="${#numbers.formatDecimal(snapshot.avgDailyExpense,1,2)}">0.00</h3>
+					<div class="stat-note down">30-day average</div>
+				</div>
+				<div class="stat-card">
+					<p>Expense Entries</p>
+					<h3 th:text="${snapshot.expenseCount}">0</h3>
+					<div class="stat-note up">Logged in the period</div>
+				</div>
+				<div class="stat-card">
+					<p>Financial Records</p>
+					<h3 th:text="${snapshot.recordCount}">0</h3>
+					<div class="stat-note up">Revenue &amp; expense notes</div>
+				</div>
+			</div>
+
+			<div class="grid-core finance-grid">
+				<section class="finance-card insights">
+					<div class="card-head">
+						<h4>Predictive Insights</h4>
+						<span class="detail-link">Weekly trend</span>
+					</div>
+					<div class="insight-grid">
+						<div class="insight-card">
+							<span class="insight-label">Revenue Momentum</span>
+							<div class="insight-value">
+								<span class="mono" th:text="${insights.revenueChangePercent} + '%'">0%</span>
+							</div>
+							<span class="insight-note">vs previous 7 days</span>
+						</div>
+						<div class="insight-card">
+							<span class="insight-label">Expense Momentum</span>
+							<div class="insight-value warn">
+								<span class="mono" th:text="${insights.expenseChangePercent} + '%'">0%</span>
+							</div>
+							<span class="insight-note">vs previous 7 days</span>
+						</div>
+						<div class="insight-card">
+							<span class="insight-label">Net Trend</span>
+							<div class="insight-value">
+								<span th:text="${insights.netTrendLabel}">Stable</span>
+							</div>
+							<span class="insight-note">Week-over-week</span>
+						</div>
+					</div>
+				</section>
+
+				<section class="finance-card insights">
+					<div class="card-head">
+						<h4>Analytics Highlights</h4>
+						<span class="detail-link">Last 7 days</span>
+					</div>
+					<div class="insight-grid">
+						<div class="insight-card">
+							<span class="insight-label">Top Expense Type</span>
+							<div class="insight-value">
+								<span th:text="${insights.topExpenseType}">None</span>
+							</div>
+							<span class="insight-note mono" th:text="${#numbers.formatDecimal(insights.topExpenseAmount,1,2)}">0.00</span>
+						</div>
+						<div class="insight-card">
+							<span class="insight-label">Best Revenue Day</span>
+							<div class="insight-value">
+								<span th:text="${insights.bestRevenueDay}">N/A</span>
+							</div>
+							<span class="insight-note mono" th:text="${#numbers.formatDecimal(insights.bestRevenueAmount,1,2)}">0.00</span>
+						</div>
+						<div class="insight-card">
+							<span class="insight-label">Focus Signal</span>
+							<div class="insight-value">
+								<span th:text="${insights.netTrendLabel} == 'Improving' ? 'Scale sales' : 'Trim costs'">Scale sales</span>
+							</div>
+							<span class="insight-note">Based on net trend</span>
+						</div>
+					</div>
+				</section>
+
+				<section class="finance-card expenses scrollable">
+					<div class="card-head">
+						<h4>Latest Expenses</h4>
+						<form class="filter-form" method="get" action="/modules/finance">
+							<input type="hidden" name="mixPeriod" th:value="${mixPeriod}">
+							<input type="hidden" name="recordsPeriod" th:value="${recordsPeriod}">
+							<input type="hidden" name="recordsView" th:value="${recordsView}">
+							<input type="hidden" name="reportsPeriod" th:value="${reportsPeriod}">
+							<select name="expensesPeriod">
+								<option value="7" th:selected="${expensesPeriod == '7'}">Last 7 days</option>
+								<option value="30" th:selected="${expensesPeriod == '30'}">Last 30 days</option>
+								<option value="90" th:selected="${expensesPeriod == '90'}">Last 90 days</option>
+								<option value="all" th:selected="${expensesPeriod == 'all'}">All time</option>
+							</select>
+							<select name="expensesView">
+								<option value="recent" th:selected="${expensesView == 'recent'}">Latest 6</option>
+								<option value="all" th:selected="${expensesView == 'all'}">View all</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+					<table>
+						<thead>
+							<tr>
+								<th>Date</th>
+								<th>Type</th>
+								<th>Amount</th>
+								<th>Notes</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr th:each="expense : ${recentExpenses}">
+								<td th:text="${expense.date}">2026-03-10</td>
+								<td th:text="${expense.type}">Utilities</td>
+								<td class="mono" th:text="${#numbers.formatDecimal(expense.amount,1,2)}">0.00</td>
+								<td th:text="${expense.description}">Sample expense</td>
+							</tr>
+							<tr th:if="${#lists.isEmpty(recentExpenses)}">
+								<td colspan="4">No expense records yet.</td>
+							</tr>
+						</tbody>
+					</table>
+				</section>
+
+				<section class="finance-card expense-mix scrollable">
+					<div class="card-head">
+						<h4>Expense Mix</h4>
+						<form class="filter-form" method="get" action="/modules/finance">
+							<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
+							<input type="hidden" name="expensesView" th:value="${expensesView}">
+							<input type="hidden" name="recordsPeriod" th:value="${recordsPeriod}">
+							<input type="hidden" name="recordsView" th:value="${recordsView}">
+							<input type="hidden" name="reportsPeriod" th:value="${reportsPeriod}">
+							<select name="mixPeriod">
+								<option value="7" th:selected="${mixPeriod == '7'}">Last 7 days</option>
+								<option value="30" th:selected="${mixPeriod == '30'}">Last 30 days</option>
+								<option value="90" th:selected="${mixPeriod == '90'}">Last 90 days</option>
+								<option value="all" th:selected="${mixPeriod == 'all'}">All time</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+					<p class="helper">Share of total expenses by category (last 30 days).</p>
+					<div class="breakdown-list">
+						<div class="breakdown-row" th:each="item : ${expenseBreakdown}">
+							<div class="label">
+								<span th:text="${item.type}">Utilities</span>
+								<span class="mono" th:text="${#numbers.formatDecimal(item.total,1,2)}">0.00</span>
+							</div>
+							<div class="bar">
+								<span class="bar-fill" th:style="'width:' + ${item.percent} + '%'"></span>
+							</div>
+							<div class="percent" th:text="${item.percent + '%'}">0%</div>
+						</div>
+						<div class="empty-note" th:if="${#lists.isEmpty(expenseBreakdown)}">
+							Add expenses to see category breakdown.
+						</div>
+					</div>
+				</section>
+
+				<section class="finance-card records scrollable">
+					<div class="card-head">
+						<h4>Financial Records</h4>
+						<form class="filter-form" method="get" action="/modules/finance">
+							<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
+							<input type="hidden" name="expensesView" th:value="${expensesView}">
+							<input type="hidden" name="mixPeriod" th:value="${mixPeriod}">
+							<input type="hidden" name="reportsPeriod" th:value="${reportsPeriod}">
+							<select name="recordsPeriod">
+								<option value="7" th:selected="${recordsPeriod == '7'}">Last 7 days</option>
+								<option value="30" th:selected="${recordsPeriod == '30'}">Last 30 days</option>
+								<option value="90" th:selected="${recordsPeriod == '90'}">Last 90 days</option>
+								<option value="all" th:selected="${recordsPeriod == 'all'}">All time</option>
+							</select>
+							<select name="recordsView">
+								<option value="recent" th:selected="${recordsView == 'recent'}">Latest 6</option>
+								<option value="all" th:selected="${recordsView == 'all'}">View all</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+				<table>
+					<thead>
+						<tr>
+							<th>Date</th>
+							<th>Type</th>
+							<th>Amount</th>
+							<th>Notes</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="record : ${recentRecords}">
+							<td th:text="${record.date}">2026-03-10</td>
+							<td>
+								<span class="tag" th:classappend="${record.type == 'Revenue'} ? ' good' : ' warn'"
+									th:text="${record.type}">Revenue</span>
+							</td>
+							<td class="mono" th:text="${#numbers.formatDecimal(record.amount,1,2)}">0.00</td>
+							<td th:text="${record.notes}">Record note</td>
+						</tr>
+						<tr th:if="${#lists.isEmpty(recentRecords)}">
+							<td colspan="4">No financial records yet.</td>
+						</tr>
+					</tbody>
+				</table>
+				</section>
+
+				<section class="finance-card reports scrollable">
+					<div class="card-head">
+						<h4>Basic Financial Reports</h4>
+						<form class="filter-form" method="get" action="/modules/finance">
+							<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
+							<input type="hidden" name="expensesView" th:value="${expensesView}">
+							<input type="hidden" name="mixPeriod" th:value="${mixPeriod}">
+							<input type="hidden" name="recordsPeriod" th:value="${recordsPeriod}">
+							<input type="hidden" name="recordsView" th:value="${recordsView}">
+							<select name="reportsPeriod">
+								<option value="6" th:selected="${reportsPeriod == '6'}">Last 6 months</option>
+								<option value="12" th:selected="${reportsPeriod == '12'}">Last 12 months</option>
+								<option value="24" th:selected="${reportsPeriod == '24'}">Last 24 months</option>
+								<option value="all" th:selected="${reportsPeriod == 'all'}">All time</option>
+							</select>
+							<button class="pill ghost" type="submit">Apply</button>
+						</form>
+					</div>
+				<table class="reports-table">
+					<thead>
+						<tr>
+							<th>Month</th>
+							<th>Revenue</th>
+							<th>Expenses</th>
+							<th>Net</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr th:each="report : ${monthlyReports}">
+							<td th:text="${report.label}">Mar 2026</td>
+							<td>
+								<div class="report-cell">
+									<span class="mono" th:text="${#numbers.formatDecimal(report.revenue,1,2)}">0.00</span>
+									<div class="bar">
+										<span class="bar-fill good" th:style="'width:' + ${report.revenuePercent} + '%'"></span>
+									</div>
+								</div>
+							</td>
+							<td>
+								<div class="report-cell">
+									<span class="mono" th:text="${#numbers.formatDecimal(report.expenses,1,2)}">0.00</span>
+									<div class="bar">
+										<span class="bar-fill warn" th:style="'width:' + ${report.expensePercent} + '%'"></span>
+									</div>
+								</div>
+							</td>
+							<td class="mono" th:text="${#numbers.formatDecimal(report.net,1,2)}">0.00</td>
+						</tr>
+						<tr th:if="${#lists.isEmpty(monthlyReports)}">
+							<td colspan="4">No reports yet. Add records to generate monthly trends.</td>
+						</tr>
+					</tbody>
+				</table>
+				</section>
 			</div>
 
 			<p class="footer-note">
-				This placeholder keeps the route live while the module is under development.
+				Finance module data is pulled directly from the database tables for expenses and financial records.
 			</p>
 		</main>
 	</div>
+	<div class="modal-backdrop" id="signout-modal" aria-hidden="true">
+		<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="signout-title">
+			<h4 id="signout-title">Sign out</h4>
+			<p>Are you sure you want to sign out?</p>
+			<div class="modal-actions">
+				<button class="modal-btn" type="button" data-signout-cancel>Cancel</button>
+				<button class="modal-btn primary" type="button" data-signout-confirm>Sign out</button>
+			</div>
+		</div>
+	</div>
+	<script src="/js/signout.js"></script>
 </body>
 </html>
