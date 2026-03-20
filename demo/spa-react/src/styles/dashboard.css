@@ -176,16 +176,6 @@
 	font-size: 0.85rem;
 	width: 100%;
 	color: var(--text-main);
-	appearance: none;
-	-webkit-appearance: none;
-	background-image: none !important;
-}
-
-.search-input input::-webkit-search-decoration,
-.search-input input::-webkit-search-cancel-button,
-.search-input input::-webkit-search-results-button,
-.search-input input::-webkit-search-results-decoration {
-	display: none;
 }
 
 .search-input svg {
@@ -194,10 +184,6 @@
 	stroke: var(--text-dim);
 	fill: none;
 	stroke-width: 1.8;
-}
-
-.search-input .search-icon {
-	display: none;
 }
 
 .header-tools select {

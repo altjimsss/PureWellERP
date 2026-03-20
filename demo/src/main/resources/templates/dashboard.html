@@ -197,6 +197,11 @@
 						<a href="#" class="detail-link">Details</a>
 					</div>
 					<div class="donut" th:style="'background: conic-gradient(#5a69d8 0 ' + ${stats.servicePercent} + '%, #e8ebf7 ' + ${stats.servicePercent} + '% 100%)'">
+						<svg class="donut-svg" viewBox="0 0 120 120" aria-hidden="true">
+							<circle class="donut-track" cx="60" cy="60" r="46"></circle>
+							<circle class="donut-progress" cx="60" cy="60" r="46"
+								th:attr="stroke-dasharray=${(stats.servicePercent / 100.0) * 289.026} + ' 289.026'"></circle>
+						</svg>
 						<div class="donut-core" th:text="${stats.servicePercent} + '%'">17.2%</div>
 					</div>
 					<ul class="legend">
@@ -376,7 +381,7 @@
 			</div>
 		</div>
 	</div>
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="/js/vendor/chart.umd.min.js"></script>
 	<script th:inline="javascript">
 		const fleetLabels = /*[[${fleetLabels}]]*/ [];
 		const fleetDistance = /*[[${fleetDistance}]]*/ [];

@@ -88,7 +88,7 @@ public class LoginController {
 					account.profilePicUrl()
 			);
 			SessionUtil.setUser(session, profile);
-			return "redirect:/";
+			return "redirect:/spa/";
 		} catch (DataAccessException ex) {
 			return renderError(model, "Unable to reach the database. Please try again.");
 		}

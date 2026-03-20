@@ -1,0 +1,177 @@
+.subtle {
+	margin: 4px 0 0;
+	color: var(--text-dim);
+	font-size: 0.9rem;
+}
+
+.db-alert {
+	padding: 12px 16px;
+	border-radius: 12px;
+	background: #fff1f1;
+	border: 1px solid rgba(209, 99, 99, 0.3);
+	color: #b24b4b;
+	font-size: 0.9rem;
+	margin-bottom: 16px;
+}
+
+.procurement-grid {
+	display: grid;
+	grid-template-columns: repeat(12, minmax(0, 1fr));
+	gap: 16px;
+}
+
+.procurement-card {
+	border-radius: var(--radius-lg);
+	padding: 16px;
+	border: var(--card-border);
+	background: #ffffff;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+	min-width: 0;
+}
+
+.procurement-card:hover {
+	transform: translateY(-4px);
+	border-color: rgba(90, 105, 216, 0.35);
+	box-shadow: var(--card-shadow-hover);
+}
+
+.procurement-card.span-5 {
+	grid-column: span 5;
+}
+
+.procurement-card.span-7 {
+	grid-column: span 7;
+}
+
+.procurement-card.span-12 {
+	grid-column: span 12;
+}
+
+.filter-form {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex-wrap: wrap;
+}
+
+.filter-form select {
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 999px;
+	padding: 6px 12px;
+	font-size: 0.8rem;
+	background: #f4f6ff;
+	color: #3b4a62;
+}
+
+.filter-form button {
+	border: none;
+	cursor: pointer;
+}
+
+.add-form .pill,
+.status-form .pill {
+	border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.add-form {
+	display: grid;
+	grid-template-columns: repeat(6, minmax(0, 1fr));
+	gap: 10px;
+	margin-bottom: 12px;
+}
+
+.add-form input {
+	padding: 8px 10px;
+	border-radius: 10px;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	background: #ffffff;
+}
+
+.status-form {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.status-form select {
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 999px;
+	padding: 6px 10px;
+	font-size: 0.78rem;
+	background: #f4f6ff;
+	color: #3b4a62;
+}
+
+.icon-btn {
+	width: 32px;
+	height: 32px;
+	border-radius: 8px;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	background: #ffffff;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.icon-btn svg {
+	width: 16px;
+	height: 16px;
+	stroke: #6b7280;
+	fill: none;
+	stroke-width: 1.8;
+}
+
+.icon-btn:hover {
+	transform: translateY(-2px);
+	border-color: rgba(90, 105, 216, 0.28);
+	box-shadow: 0 8px 16px rgba(60, 90, 150, 0.12);
+}
+
+.action-col {
+	width: 90px;
+	text-align: center;
+}
+
+tbody td:last-child {
+	text-align: center;
+}
+
+@media (max-width: 1100px) {
+	.add-form {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 720px) {
+	.add-form {
+		grid-template-columns: 1fr;
+	}
+}
+.table-scroll {
+	max-height: 320px;
+	overflow: auto;
+	border: 1px solid rgba(0, 0, 0, 0.06);
+	border-radius: 12px;
+}
+
+.table-scroll table {
+	border-collapse: collapse;
+}
+
+.table-scroll thead th {
+	position: sticky;
+	top: 0;
+	background: #ffffff;
+	z-index: 1;
+}
+
+
+@media (max-width: 1100px) {
+	.procurement-card.span-5,
+	.procurement-card.span-7,
+	.procurement-card.span-12 {
+		grid-column: span 12;
+	}
+}

@@ -582,7 +582,7 @@
 	</div>
 	<script src="/js/signout.js"></script>
 	<script src="/js/ui-animate.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script src="/js/vendor/chart.umd.min.js"></script>
 	<script>
 		const editModal = document.getElementById("record-edit-modal");
 		const editButtons = document.querySelectorAll("[data-record-edit]");
@@ -671,6 +671,49 @@
 				return;
 			}
 
+			if (window.Chart) {
+				const canvas = chart.querySelector("canvas") || document.createElement("canvas");
+				if (!canvas.parentElement) {
+					chart.innerHTML = "";
+					chart.appendChild(canvas);
+				}
+				const labels = points.map((item) => item.label);
+				const values = points.map((item) => item.value);
+				const colors = ["#3aa4e0", "#8fd3f4", "#7c3aed", "#c8b5ff", "#b24b4b", "#8b8fe5"];
+
+				if (chart.__chartInstance) {
+					chart.__chartInstance.destroy();
+				}
+				chart.__chartInstance = new Chart(canvas.getContext("2d"), {
+					type: "doughnut",
+					data: {
+						labels,
+						datasets: [
+							{
+								data: values,
+								backgroundColor: colors.slice(0, values.length),
+								borderWidth: 0
+							}
+						]
+					},
+					options: {
+						cutout: "60%",
+						plugins: { legend: { display: false } }
+					}
+				});
+				legend.innerHTML = "";
+				points.forEach((item, index) => {
+					const percent = Math.round((item.value / total) * 100);
+					const legendItem = document.createElement("li");
+					legendItem.innerHTML = `
+						<span class="dot" style="background: ${colors[index % colors.length]}"></span>
+						${item.label} (${percent}%)
+					`;
+					legend.appendChild(legendItem);
+				});
+				return;
+			}
+
 			const colors = ["#3aa4e0", "#8fd3f4", "#7c3aed", "#c8b5ff", "#b24b4b", "#8b8fe5"];
 			let angle = 0;
 			const stops = [];
@@ -720,7 +763,8 @@
 			}
 
 			if (!window.Chart || !container.getContext) {
-				container.textContent = "Chart unavailable";
+				container.textContent = "Loading chart...";
+				document.addEventListener("chartjs:ready", renderIncomeExpenseChart, { once: true });
 				return;
 			}
 
