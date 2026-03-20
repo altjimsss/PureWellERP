@@ -3,3 +3,5 @@ demo/src/main/resources/static/css/** linguist-language=CSS
 demo/src/main/resources/static/js/** linguist-language=JavaScript
 demo/src/main/resources/templates/** linguist-language=HTML
 demo/src/main/resources/static/img/** linguist-vendored
+demo/src/main/resources/static/spa/** linguist-vendored
+demo/spa-react/** linguist-language=TypeScript
