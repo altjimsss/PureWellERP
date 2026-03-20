@@ -22,6 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -41,6 +42,10 @@ public class FinanceController {
 			@RequestParam(name = "expensesView", defaultValue = "recent") String expensesView,
 			@RequestParam(name = "recordsPeriod", defaultValue = "30") String recordsPeriod,
 			@RequestParam(name = "recordsView", defaultValue = "recent") String recordsView,
+			@RequestParam(name = "recordsQuery", required = false) String recordsQuery,
+			@RequestParam(name = "recordsType", required = false) String recordsType,
+			@RequestParam(name = "recordsFrom", required = false) String recordsFrom,
+			@RequestParam(name = "recordsTo", required = false) String recordsTo,
 			@RequestParam(name = "reportsPeriod", defaultValue = "6") String reportsPeriod,
 			@RequestParam(name = "mixPeriod", defaultValue = "30") String mixPeriod
 	) {
@@ -55,6 +60,10 @@ public class FinanceController {
 		model.addAttribute("expensesView", expensesView);
 		model.addAttribute("recordsPeriod", recordsPeriod);
 		model.addAttribute("recordsView", recordsView);
+		model.addAttribute("recordsQuery", recordsQuery);
+		model.addAttribute("recordsType", recordsType);
+		model.addAttribute("recordsFrom", recordsFrom);
+		model.addAttribute("recordsTo", recordsTo);
 		model.addAttribute("reportsPeriod", reportsPeriod);
 		model.addAttribute("mixPeriod", mixPeriod);
 		try {
@@ -68,7 +77,14 @@ public class FinanceController {
 			model.addAttribute("snapshot", loadSnapshot());
 			model.addAttribute("insights", loadInsights());
 			model.addAttribute("recentExpenses", loadRecentExpenses(expensesDays, expensesAll ? null : 6));
-			model.addAttribute("recentRecords", loadRecentRecords(recordsDays, recordsAll ? null : 6));
+			model.addAttribute("recentRecords", loadRecentRecords(
+					recordsDays,
+					recordsAll ? null : 6,
+					normalizeBlank(recordsQuery),
+					normalizeBlank(recordsType),
+					normalizeBlank(recordsFrom),
+					normalizeBlank(recordsTo)
+			));
 			model.addAttribute("monthlyReports", loadMonthlyReports(reportsMonths));
 			model.addAttribute("expenseBreakdown", loadExpenseBreakdown(mixDays));
 			model.addAttribute("dbAvailable", true);
@@ -105,7 +121,7 @@ public class FinanceController {
 		FinanceSnapshot snapshot = loadSnapshot();
 		FinanceInsights insights = loadInsights();
 		List<ExpenseRow> expenses = loadRecentExpenses(expensesDays, expensesAll ? null : 6);
-		List<FinancialRecordRow> records = loadRecentRecords(recordsDays, recordsAll ? null : 6);
+		List<FinancialRecordRow> records = loadRecentRecords(recordsDays, recordsAll ? null : 6, null, null, null, null);
 		List<MonthlyReportRow> reports = loadMonthlyReports(reportsMonths);
 
 		String safeFormat = normalizeFormat(format);
@@ -120,6 +136,35 @@ public class FinanceController {
 			return;
 		}
 		writeCsvReport(response, filename, included, snapshot, insights, expenses, records, reports);
+	}
+
+	@PostMapping("/modules/finance/records/update")
+	public String updateFinancialRecord(
+			@RequestParam("recordId") Integer recordId,
+			@RequestParam("recordType") String recordType,
+			@RequestParam("amount") BigDecimal amount,
+			@RequestParam("date") String date,
+			@RequestParam(name = "notes", required = false) String notes
+	) {
+		jdbcTemplate.update(
+				"""
+				update financial_records
+				set record_type = ?, amount = ?, date = ?, notes = ?
+				where id = ?
+				""",
+				recordType,
+				amount,
+				LocalDate.parse(date),
+				notes,
+				recordId
+		);
+		return "redirect:/modules/finance";
+	}
+
+	@PostMapping("/modules/finance/records/delete")
+	public String deleteFinancialRecord(@RequestParam("recordId") Integer recordId) {
+		jdbcTemplate.update("delete from financial_records where id = ?", recordId);
+		return "redirect:/modules/finance";
 	}
 
 	private FinanceSnapshot loadSnapshot() {
@@ -285,13 +330,48 @@ public class FinanceController {
 		);
 	}
 
-	private List<FinancialRecordRow> loadRecentRecords(Integer days, Integer limit) {
+	private List<FinancialRecordRow> loadRecentRecords(
+			Integer days,
+			Integer limit,
+			String query,
+			String type,
+			String fromDate,
+			String toDate
+	) {
 		StringBuilder sql = new StringBuilder(
 				"select id, record_type, amount, date, notes from financial_records");
-		Object[] params = new Object[] {};
+		List<Object> params = new java.util.ArrayList<>();
+		boolean hasWhere = false;
 		if (days != null) {
 			sql.append(" where date >= current_date - (? * interval '1 day')");
-			params = new Object[] { days };
+			params.add(days);
+			hasWhere = true;
+		}
+		if (type != null) {
+			sql.append(hasWhere ? " and " : " where ");
+			sql.append("record_type = ?");
+			params.add(type);
+			hasWhere = true;
+		}
+		if (fromDate != null) {
+			sql.append(hasWhere ? " and " : " where ");
+			sql.append("date >= ?");
+			params.add(LocalDate.parse(fromDate));
+			hasWhere = true;
+		}
+		if (toDate != null) {
+			sql.append(hasWhere ? " and " : " where ");
+			sql.append("date <= ?");
+			params.add(LocalDate.parse(toDate));
+			hasWhere = true;
+		}
+		if (query != null) {
+			sql.append(hasWhere ? " and " : " where ");
+			sql.append("(record_type ilike ? or notes ilike ? or to_char(date, 'YYYY-MM-DD') ilike ?)");
+			String pattern = "%" + query + "%";
+			params.add(pattern);
+			params.add(pattern);
+			params.add(pattern);
 		}
 		sql.append(" order by date desc, id desc");
 		if (limit != null) {
@@ -306,7 +386,7 @@ public class FinanceController {
 						rs.getDate("date").toLocalDate(),
 						rs.getString("notes")
 				),
-				params
+				params.toArray()
 		);
 	}
 
@@ -432,6 +512,14 @@ public class FinanceController {
 
 	private static boolean isViewAll(String value) {
 		return value != null && value.trim().equalsIgnoreCase("all");
+	}
+
+	private static String normalizeBlank(String value) {
+		if (value == null) {
+			return null;
+		}
+		String normalized = value.trim();
+		return normalized.isEmpty() ? null : normalized;
 	}
 
 	private int parseMonthsPeriod(String value) {
