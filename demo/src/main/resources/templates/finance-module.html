@@ -87,7 +87,7 @@
 					<div class="user-meta">
 						<strong th:text="${userProfile.fullName}">User Name</strong>
 						<span th:text="${userProfile.role}">Staff</span>
-						<small th:text="${userProfile.position + ' • ' + userProfile.department}">Role • Department</small>
+						<small th:text="${userProfile.position + ' - ' + userProfile.department}">Role - Department</small>
 					</div>
 				</div>
 				<a class="pill ghost signout-link" href="/logout" data-signout-trigger>
@@ -241,7 +241,7 @@
 						<div class="insight-card">
 							<span class="insight-label">Focus Signal</span>
 							<div class="insight-value">
-								<span th:text="${insights.netTrendLabel} == 'Improving' ? 'Scale sales' : 'Trim costs'">Scale sales</span>
+								<span th:text="${insights.netTrendLabel == 'Improving'} ? 'Scale sales' : 'Trim costs'">Scale sales</span>
 							</div>
 							<span class="insight-note">Based on net trend</span>
 						</div>
@@ -283,7 +283,7 @@
 				<section class="finance-card expenses scrollable">
 					<div class="card-head">
 						<h4>Latest Expenses</h4>
-						<form class="filter-form" method="get" action="/modules/finance">
+						<form class="filter-form filter-bar" method="get" action="/modules/finance">
 							<input type="hidden" name="mixPeriod" th:value="${mixPeriod}">
 							<input type="hidden" name="recordsPeriod" th:value="${recordsPeriod}">
 							<input type="hidden" name="recordsView" th:value="${recordsView}">
@@ -303,6 +303,7 @@
 								<option value="all" th:selected="${expensesView == 'all'}">View all</option>
 							</select>
 							<button class="pill ghost" type="submit">Apply</button>
+							<a class="pill ghost reset-link" href="/modules/finance" data-toast="Filters cleared">Reset all</a>
 						</form>
 					</div>
 					<table>
@@ -331,7 +332,7 @@
 				<section class="finance-card expense-mix scrollable">
 					<div class="card-head">
 						<h4>Expense Mix</h4>
-						<form class="filter-form" method="get" action="/modules/finance">
+						<form class="filter-form filter-bar" method="get" action="/modules/finance">
 							<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
 							<input type="hidden" name="expensesView" th:value="${expensesView}">
 							<input type="hidden" name="recordsPeriod" th:value="${recordsPeriod}">
@@ -344,6 +345,7 @@
 								<option value="all" th:selected="${mixPeriod == 'all'}">All time</option>
 							</select>
 							<button class="pill ghost" type="submit">Apply</button>
+							<a class="pill ghost reset-link" href="/modules/finance" data-toast="Filters cleared">Reset all</a>
 						</form>
 					</div>
 					<p class="helper">Share of total expenses by category (last 30 days).</p>
@@ -367,7 +369,7 @@
 				<section class="finance-card records scrollable">
 					<div class="card-head">
 						<h4>Financial Records</h4>
-						<form class="filter-form" method="get" action="/modules/finance">
+						<form class="filter-form filter-bar" method="get" action="/modules/finance">
 							<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
 							<input type="hidden" name="expensesView" th:value="${expensesView}">
 							<input type="hidden" name="mixPeriod" th:value="${mixPeriod}">
@@ -412,6 +414,7 @@
 									</svg>
 								</span>
 							</a>
+							<a class="pill ghost reset-link" href="/modules/finance" data-toast="Filters cleared">Reset all</a>
 						</form>
 					</div>
 				<table>
@@ -467,7 +470,7 @@
 				<section class="finance-card reports scrollable">
 					<div class="card-head">
 						<h4>Basic Financial Reports</h4>
-						<form class="filter-form" method="get" action="/modules/finance">
+						<form class="filter-form filter-bar" method="get" action="/modules/finance">
 							<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
 							<input type="hidden" name="expensesView" th:value="${expensesView}">
 							<input type="hidden" name="mixPeriod" th:value="${mixPeriod}">
@@ -480,6 +483,7 @@
 								<option value="all" th:selected="${reportsPeriod == 'all'}">All time</option>
 							</select>
 							<button class="pill ghost" type="submit">Apply</button>
+							<a class="pill ghost reset-link" href="/modules/finance" data-toast="Filters cleared">Reset all</a>
 						</form>
 					</div>
 				<table class="reports-table">
@@ -577,6 +581,7 @@
 		</div>
 	</div>
 	<script src="/js/signout.js"></script>
+	<script src="/js/ui-animate.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 	<script>
 		const editModal = document.getElementById("record-edit-modal");

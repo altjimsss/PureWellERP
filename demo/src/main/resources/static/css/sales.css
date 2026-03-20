@@ -8,37 +8,20 @@ body {
 	align-items: center;
 	gap: 16px;
 	margin-bottom: 18px;
-}
-
-.panel-actions {
-	display: flex;
-	gap: 10px;
+	margin-top: -36px;
+	position: sticky;
+	top: 0;
+	z-index: 10;
+	background: #ffffff;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+	margin-left: -24px;
+	margin-right: -24px;
+	padding: 12px 24px;
 }
 
 .pill.ghost {
 	background: #f4f6ff;
 	color: #5a69d8;
-}
-
-.icon-only {
-	padding: 6px 10px;
-}
-
-.pill-icon {
-	width: 18px;
-	height: 18px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	color: #4e6a86;
-}
-
-.pill-icon svg {
-	width: 18px;
-	height: 18px;
-	stroke: currentColor;
-	fill: none;
-	stroke-width: 1.8;
 }
 
 .subtle {
@@ -62,9 +45,9 @@ body {
 }
 
 .sales-card {
-	border-radius: 16px;
+	border-radius: var(--radius-lg);
 	padding: 16px;
-	border: 1px solid rgba(0, 0, 0, 0.04);
+	border: var(--card-border);
 	background: #ffffff;
 	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 	min-width: 0;
@@ -73,7 +56,7 @@ body {
 .sales-card:hover {
 	transform: translateY(-4px);
 	border-color: rgba(90, 105, 216, 0.35);
-	box-shadow: 0 16px 32px rgba(60, 90, 150, 0.12);
+	box-shadow: var(--card-shadow-hover);
 }
 
 .sales-card.record {
@@ -136,31 +119,12 @@ body {
 .sales-card.scrollable {
 	max-height: 420px;
 	overflow: auto;
-	scrollbar-width: thin;
-	scrollbar-color: rgba(90, 105, 216, 0.35) transparent;
 }
 
 .sales-card.deliveries {
 	overflow-x: hidden;
 }
 
-.sales-card.scrollable::-webkit-scrollbar {
-	width: 8px;
-	height: 8px;
-}
-
-.sales-card.scrollable::-webkit-scrollbar-track {
-	background: transparent;
-}
-
-.sales-card.scrollable::-webkit-scrollbar-thumb {
-	background: rgba(90, 105, 216, 0.35);
-	border-radius: 999px;
-}
-
-.sales-card.scrollable::-webkit-scrollbar-thumb:hover {
-	background: rgba(90, 105, 216, 0.55);
-}
 
 .card-head {
 	display: flex;
@@ -527,6 +491,8 @@ body {
 table {
 	table-layout: fixed;
 	word-break: break-word;
+	border-collapse: separate;
+	border-spacing: 0;
 }
 
 th,
@@ -540,6 +506,7 @@ td {
 	top: 0;
 	background: #ffffff;
 	z-index: 1;
+	box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
 }
 
 .order-row {

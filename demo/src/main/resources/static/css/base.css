@@ -14,6 +14,15 @@
 	--warn: #d4a14d;
 	--good: #3f9d7a;
 	--shadow: 0 12px 32px rgba(20, 40, 60, 0.08);
+	--radius-lg: 16px;
+	--radius-md: 12px;
+	--card-border: 1px solid rgba(0, 0, 0, 0.06);
+	--card-shadow: 0 10px 24px rgba(20, 40, 60, 0.06);
+	--card-shadow-hover: 0 16px 32px rgba(60, 90, 150, 0.12);
+	--focus-ring: 0 0 0 3px rgba(58, 164, 224, 0.2);
+	--table-hover: rgba(58, 164, 224, 0.06);
+	--scroll-thumb: rgba(90, 105, 216, 0.35);
+	--scroll-thumb-hover: rgba(90, 105, 216, 0.55);
 }
 
 * {
@@ -27,6 +36,8 @@ body {
 	color: var(--text-main);
 	font-family: "Space Grotesk", "Segoe UI", sans-serif;
 	letter-spacing: 0.2px;
+	font-size: 15px;
+	line-height: 1.55;
 }
 
 .main {
@@ -228,6 +239,44 @@ body {
 	font-size: 0.85rem;
 }
 
+.panel-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.panel-actions a.pill {
+	text-decoration: none;
+}
+
+.icon-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.icon-only {
+	padding: 6px 10px;
+}
+
+.pill-icon {
+	width: 18px;
+	height: 18px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	color: #4e6a86;
+}
+
+.pill-icon svg {
+	width: 18px;
+	height: 18px;
+	stroke: currentColor;
+	fill: none;
+	stroke-width: 1.8;
+}
+
 .section-title {
 	margin: 36px 0 18px;
 	font-size: 1.2rem;
@@ -395,10 +444,12 @@ th {
 
 .sidebar-footer {
 	margin-top: auto;
-	padding: 16px 12px;
+	padding: 16px 20px;
 	border-top: 1px solid rgba(0, 0, 0, 0.06);
 	display: grid;
 	gap: 10px;
+	margin-left: -20px;
+	margin-right: -20px;
 }
 
 .user-card {
@@ -530,6 +581,72 @@ th {
 	color: #ffffff;
 }
 
+.reveal {
+	opacity: 0;
+	transform: translateY(10px);
+	transition: opacity 0.5s ease, transform 0.6s ease;
+}
+
+.reveal.is-visible {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+.pill.pressed,
+.icon-btn.pressed,
+.modal-btn.pressed {
+	transform: translateY(1px) scale(0.98);
+}
+
+.filter-bar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+	padding: 10px 12px;
+	border-radius: var(--radius-md);
+	border: 1px solid rgba(0, 0, 0, 0.06);
+	background: #f9fbff;
+	position: sticky;
+	top: 8px;
+	z-index: 2;
+}
+
+.reset-link {
+	text-decoration: none;
+}
+
+.toast-stack {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	display: grid;
+	gap: 10px;
+	z-index: 200;
+}
+
+.toast {
+	padding: 10px 14px;
+	border-radius: 12px;
+	background: #ffffff;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	box-shadow: var(--card-shadow);
+	font-size: 0.85rem;
+	color: var(--text-main);
+	animation: toast-in 0.25s ease both;
+}
+
+@keyframes toast-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
 @media (max-width: 720px) {
 	.app-shell {
 		grid-template-columns: 1fr;
@@ -548,4 +665,79 @@ th {
 		flex-direction: column;
 		align-items: flex-start;
 	}
+}
+.card,
+.section-card,
+.stat-card,
+.card-map,
+.card-donut,
+.card-list,
+.card-chart,
+.finance-card,
+.hrm-card,
+.procurement-card,
+.sales-card,
+.card-stack {
+	border-radius: var(--radius-lg);
+	border: var(--card-border);
+	background: #ffffff;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+summary:focus-visible {
+	outline: none;
+	box-shadow: var(--focus-ring);
+	border-color: rgba(58, 164, 224, 0.5);
+}
+
+table thead th {
+	position: sticky;
+	top: 0;
+	background: #ffffff;
+	z-index: 1;
+}
+
+.table-scroll,
+.scrollable {
+	scrollbar-width: thin;
+	scrollbar-color: var(--scroll-thumb) transparent;
+}
+
+.table-scroll::-webkit-scrollbar,
+.scrollable::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+
+.table-scroll::-webkit-scrollbar-track,
+.scrollable::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.table-scroll::-webkit-scrollbar-thumb,
+.scrollable::-webkit-scrollbar-thumb {
+	background: var(--scroll-thumb);
+	border-radius: 999px;
+}
+
+.table-scroll::-webkit-scrollbar-thumb:hover,
+.scrollable::-webkit-scrollbar-thumb:hover {
+	background: var(--scroll-thumb-hover);
+}
+
+tbody tr:hover {
+	background: var(--table-hover);
+}
+
+.empty-note {
+	font-size: 0.85rem;
+	color: var(--text-dim);
+	padding: 8px 10px;
+	border-radius: 10px;
+	background: rgba(58, 164, 224, 0.06);
+	border: 1px dashed rgba(58, 164, 224, 0.2);
 }

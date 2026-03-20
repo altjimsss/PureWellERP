@@ -86,7 +86,7 @@
 					<div class="user-meta">
 						<strong th:text="${userProfile.fullName}">User Name</strong>
 						<span th:text="${userProfile.role}">Staff</span>
-						<small th:text="${userProfile.position + ' • ' + userProfile.department}">Role • Department</small>
+						<small th:text="${userProfile.position + ' - ' + userProfile.department}">Role - Department</small>
 					</div>
 				</div>
 				<a class="pill ghost signout-link" href="/logout" data-signout-trigger>
@@ -107,16 +107,35 @@
 				<div class="header-title">
 					<div class="title-row">
 						<h2>Dashboard</h2>
-						<label class="date-filter">
-							<span class="sr-only">Filter by date</span>
-							<input type="date" name="dashboardDate" th:value="${today}">
-						</label>
+						<span class="role-pill" th:if="${isAdmin}">Admin view</span>
 					</div>
 					<p class="subtle">Overview</p>
 				</div>
 				<div class="panel-actions">
-					<span class="pill">Operations</span>
-					<span class="pill ghost">March Cycle</span>
+					<form class="header-tools" method="get" action="/">
+						<div class="search-input">
+							<span class="search-icon" aria-hidden="true">
+								<svg viewBox="0 0 24 24">
+									<circle cx="11" cy="11" r="7"></circle>
+									<path d="M20 20l-3.5-3.5"></path>
+								</svg>
+							</span>
+							<input type="text" name="q" placeholder="Search customers, orders, invoices, inventory"
+								th:value="${searchQuery}">
+						</div>
+						<select name="scope" aria-label="Search scope">
+							<option value="all" th:selected="${searchScope == 'all'}">All</option>
+							<option value="customers" th:selected="${searchScope == 'customers'}">Customers</option>
+							<option value="orders" th:selected="${searchScope == 'orders'}">Orders</option>
+							<option value="inventory" th:selected="${searchScope == 'inventory'}">Inventory</option>
+							<option value="finance" th:selected="${searchScope == 'finance'}">Finance</option>
+						</select>
+						<label class="date-filter">
+							<span class="sr-only">Filter by date</span>
+							<input type="date" name="dashboardDate" th:value="${today}">
+						</label>
+						<button class="pill ghost" type="submit">Apply</button>
+					</form>
 				</div>
 			</div>
 
@@ -152,25 +171,12 @@
 			</div>
 
 			<div class="stat-row">
-				<div class="stat-card">
-					<p>Vehicles on Track</p>
-					<h3 th:text="${stats.activeVehicles} + ' units'">28 units</h3>
-					<div class="stat-note down">Active fleet status</div>
-				</div>
-				<div class="stat-card">
-					<p>Distance Driven</p>
-					<h3 th:text="${stats.distanceDriven} + ' km'">9,158 km</h3>
-					<div class="stat-note up">Last 7 days</div>
-				</div>
-				<div class="stat-card">
-					<p>Empty Miles</p>
-					<h3 th:text="${stats.emptyMiles} + ' km'">271 km</h3>
-					<div class="stat-note down">Last 7 days</div>
-				</div>
-				<div class="stat-card">
-					<p>Service Time</p>
-					<h3 th:text="${stats.serviceTime} + ' hrs'">158 hrs</h3>
-					<div class="stat-note up">Last 7 days</div>
+				<div class="stat-card" th:each="card : ${kpiCards}">
+					<p th:text="${card.title}">Metric</p>
+					<h3 th:text="${card.value}">0</h3>
+					<span class="trend-badge" th:classappend="${card.trend}"
+						th:text="${card.trend == 'up'} ? '↑' : '↓'">↑</span>
+					<div class="stat-note" th:classappend="' ' + ${card.trend}" th:text="${card.note}">Details</div>
 				</div>
 			</div>
 
@@ -235,6 +241,129 @@
 					</div>
 				</div>
 			</div>
+
+			<div class="grid-core dashboard-ops">
+				<section class="card-stack alerts-card">
+					<div class="card-head">
+						<h4>Alerts &amp; Tasks</h4>
+						<span class="detail-link">Live</span>
+					</div>
+					<div class="list-stack">
+						<a class="stack-row" th:each="alert : ${alerts}" th:href="${alert.href}">
+							<span class="tag" th:classappend="' ' + ${alert.tone}" th:text="${alert.title}">Alert</span>
+							<span class="stack-text" th:text="${alert.description}">Description</span>
+						</a>
+						<div class="empty-note" th:if="${#lists.isEmpty(alerts)}">
+							No alerts right now.
+						</div>
+					</div>
+					<div class="task-list">
+						<div class="stack-row" th:each="task : ${tasks}">
+							<div>
+								<strong th:text="${task.title}">Task</strong>
+								<span class="stack-meta"
+									th:text="${task.dueDate == null - 'No due date' : 'Due ' + task.dueDate}">Due date</span>
+							</div>
+							<span class="tag" th:text="${task.priority}">Normal</span>
+						</div>
+						<div class="empty-note" th:if="${#lists.isEmpty(tasks)}">No tasks yet.</div>
+					</div>
+					<form class="inline-form" method="post" action="/dashboard/tasks">
+						<input type="text" name="title" placeholder="Add a task" required>
+						<input type="date" name="dueDate">
+						<select name="priority">
+							<option value="Normal">Normal</option>
+							<option value="High">High</option>
+							<option value="Low">Low</option>
+						</select>
+						<button class="pill" type="submit">Add task</button>
+					</form>
+				</section>
+
+				<section class="card-stack rules-card">
+					<div class="card-head">
+						<h4>Notification Rules</h4>
+						<span class="detail-link">Email, SMS, onsite</span>
+					</div>
+					<div class="list-stack">
+						<div class="stack-row" th:each="rule : ${notificationRules}">
+							<div>
+								<strong th:text="${rule.eventType}">Event</strong>
+								<span class="stack-meta" th:text="${rule.channel + ' to ' + rule.target}">Channel</span>
+							</div>
+							<span class="tag" th:classappend="${rule.active} - ' good' : ' warn'"
+								th:text="${rule.active} - 'Active' : 'Paused'">Active</span>
+						</div>
+						<div class="empty-note" th:if="${#lists.isEmpty(notificationRules)}">
+							Add rules to stay ahead of issues.
+						</div>
+					</div>
+					<form class="inline-form" method="post" action="/dashboard/notifications">
+						<select name="eventType">
+							<option value="Low stock">Low stock</option>
+							<option value="Overdue invoice">Overdue invoice</option>
+							<option value="Failed delivery">Failed delivery</option>
+						</select>
+						<select name="channel">
+							<option value="Email">Email</option>
+							<option value="SMS">SMS</option>
+							<option value="In-app">In-app</option>
+						</select>
+						<input type="text" name="target" placeholder="Target (email or number)" required>
+						<button class="pill" type="submit">Add rule</button>
+					</form>
+				</section>
+
+				<section class="card-stack audit-card">
+					<div class="card-head">
+						<h4>Audit Log Hooks</h4>
+						<span class="detail-link">Recent changes</span>
+					</div>
+					<div class="list-stack">
+						<div class="stack-row" th:each="log : ${auditLogs}">
+							<div>
+								<strong th:text="${log.action + ' ' + log.entity}">Action</strong>
+								<span class="stack-meta" th:text="${log.details}">Details</span>
+							</div>
+							<span class="stack-meta mono"
+								th:text="${log.displayTime}">Time</span>
+						</div>
+						<div class="empty-note" th:if="${#lists.isEmpty(auditLogs)}">
+							No audit entries yet.
+						</div>
+					</div>
+				</section>
+
+				<section class="card-stack search-card">
+					<div class="card-head">
+						<h4>Unified Search</h4>
+						<span class="detail-link" th:text="${searchQuery == '' ? 'Try a keyword' : 'Results'}">Results</span>
+					</div>
+					<div class="list-stack">
+						<a class="stack-row" th:each="result : ${searchResults}" th:href="${result.href}">
+							<span class="tag" th:text="${result.type}">Type</span>
+							<span class="stack-text">
+								<strong th:text="${result.title}">Title</strong>
+								<span class="stack-meta" th:text="${result.subtitle}">Subtitle</span>
+							</span>
+						</a>
+						<div class="empty-note" th:if="${#lists.isEmpty(searchResults)}">
+							No results yet. Search customers, orders, inventory, or finance.
+						</div>
+					</div>
+				</section>
+
+				<section class="card-stack actions-card">
+					<div class="card-head">
+						<h4>Quick Actions</h4>
+						<span class="detail-link">Shortcuts</span>
+					</div>
+					<div class="action-grid">
+						<a class="pill ghost" th:each="action : ${quickActions}" th:href="${action.href}"
+							th:text="${action.label}">Action</a>
+					</div>
+				</section>
+			</div>
 		</main>
 	</div>
 	<div class="modal-backdrop" id="signout-modal" aria-hidden="true">
@@ -257,6 +386,7 @@
 		window.__FLEET_DATA__ = { fleetLabels, fleetDistance, fleetEmpty, revenueLabels, revenueSeries };
 	</script>
 	<script src="/js/dashboard.js"></script>
+	<script src="/js/ui-animate.js"></script>
 	<script src="/js/signout.js"></script>
 </body>
 </html>

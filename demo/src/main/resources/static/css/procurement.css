@@ -1,38 +1,3 @@
-.panel-actions a.pill {
-	text-decoration: none;
-}
-
-.icon-pill {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-}
-
-.icon-only {
-	padding: 8px 10px;
-}
-
-.icon-only .pill-icon {
-	margin: 0;
-}
-
-.pill-icon {
-	width: 18px;
-	height: 18px;
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	color: #4e6a86;
-}
-
-.pill-icon svg {
-	width: 18px;
-	height: 18px;
-	stroke: currentColor;
-	fill: none;
-	stroke-width: 1.8;
-}
-
 .subtle {
 	margin: 4px 0 0;
 	color: var(--text-dim);
@@ -56,9 +21,9 @@
 }
 
 .procurement-card {
-	border-radius: 16px;
+	border-radius: var(--radius-lg);
 	padding: 16px;
-	border: 1px solid rgba(0, 0, 0, 0.06);
+	border: var(--card-border);
 	background: #ffffff;
 	transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 	min-width: 0;
@@ -67,7 +32,7 @@
 .procurement-card:hover {
 	transform: translateY(-4px);
 	border-color: rgba(90, 105, 216, 0.35);
-	box-shadow: 0 16px 32px rgba(60, 90, 150, 0.12);
+	box-shadow: var(--card-shadow-hover);
 }
 
 .procurement-card.span-5 {
@@ -202,19 +167,6 @@ tbody td:last-child {
 	z-index: 1;
 }
 
-.table-scroll::-webkit-scrollbar {
-	height: 8px;
-	width: 8px;
-}
-
-.table-scroll::-webkit-scrollbar-thumb {
-	background: rgba(90, 105, 216, 0.35);
-	border-radius: 999px;
-}
-
-.table-scroll::-webkit-scrollbar-track {
-	background: transparent;
-}
 
 @media (max-width: 1100px) {
 	.procurement-card.span-5,
