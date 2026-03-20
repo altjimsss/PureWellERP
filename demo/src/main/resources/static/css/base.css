@@ -60,6 +60,10 @@ body {
 	box-shadow: none;
 }
 
+.sidebar .nav a[aria-current="page"] .nav-icon {
+	color: var(--accent);
+}
+
 @keyframes fadeUp {
 	from {
 		opacity: 0;
@@ -168,7 +172,7 @@ body {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	color: #4e6a86;
+	color: var(--text-dim);
 }
 
 .nav-icon svg {
@@ -184,7 +188,7 @@ body {
 }
 
 .main {
-	padding: 36px 32px 64px;
+	padding: 36px 24px 64px;
 }
 
 .topbar {

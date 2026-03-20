@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Error</title>
+	<link rel="stylesheet" href="/css/base.css">
+	<link rel="stylesheet" href="/css/error.css">
+</head>
+<body>
+	<main class="error-shell">
+		<div class="error-card">
+			<div class="error-badge">Error</div>
+			<h1 th:text="${status}">500</h1>
+			<p class="error-title" th:text="${error}">Internal Server Error</p>
+			<p class="error-message" th:text="${message}">Something went wrong.</p>
+			<p class="error-path" th:text="${path}">/</p>
+			<div class="error-actions">
+				<a class="pill primary" href="/">Go to Dashboard</a>
+				<a class="pill ghost" href="javascript:history.back()">Go Back</a>
+			</div>
+		</div>
+	</main>
+</body>
+</html>
