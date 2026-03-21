@@ -82,15 +82,14 @@ Finance & Accounting, Procurement & Inventory, and Sales & Delivery.
   - From demo/: mvn javafx:run
 
 7. Folder Structure (Key Paths)
-demo/
-  src/main/java/com/example/demo/
-    Application.java
-    DesktopLauncher.java
-    web/ (controllers + services)
-  src/main/resources/
-    templates/ (HTML pages)
-    static/css/ (styles)
-    static/js/ (scripts)
+src/main/java/com/example/demo/
+  Application.java
+  DesktopLauncher.java
+  web/ (controllers + services)
+src/main/resources/
+  templates/ (HTML pages)
+  static/css/ (styles)
+  static/js/ (scripts)
 
 8. Notes
 - Session is cookie-based to avoid ;jsessionid in URLs.

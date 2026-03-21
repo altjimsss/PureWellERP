@@ -1,8 +1,10 @@
-demo/src/main/java/** linguist-language=Java
-demo/src/main/resources/static/css/** linguist-language=CSS
-demo/src/main/resources/static/js/** linguist-language=JavaScript
-demo/src/main/resources/templates/** linguist-language=HTML
-demo/src/main/resources/static/img/** linguist-vendored
-demo/src/main/resources/static/spa/** linguist-vendored
-demo/spa-react/** linguist-language=TypeScript
-demo/** linguist-detectable=true
+src/main/java/** linguist-language=Java
+src/main/resources/static/css/** linguist-language=CSS
+src/main/resources/static/js/** linguist-language=JavaScript
+src/main/resources/templates/** linguist-language=HTML
+src/main/resources/static/img/** linguist-vendored
+src/main/resources/static/spa/** linguist-vendored
+spa-react/** linguist-language=TypeScript
+** linguist-detectable=true
+/mvnw text eol=lf
+*.cmd text eol=crlf
