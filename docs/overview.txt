@@ -1,0 +1,99 @@
+PureWell ERP - Project Documentation (Manual)
+Generated: 2026-03-21
+
+1. Project Overview
+PureWell ERP is a Spring Boot + Thymeleaf web application with a JavaFX
+desktop wrapper. It provides an ERP-style dashboard and modules for HRM,
+Finance & Accounting, Procurement & Inventory, and Sales & Delivery.
+
+2. Tech Stack
+- Backend: Java 17, Spring Boot (MVC), JDBC (JdbcTemplate)
+- Frontend: Thymeleaf templates + static CSS/JS
+- Database: PostgreSQL (Supabase-hosted)
+- Desktop: JavaFX WebView wrapper (DesktopLauncher)
+
+3. Modules and Key Screens
+- Login / Authentication
+  - Controller: LoginController
+  - Template: templates/login.html
+  - Validates user accounts, sets session user profile, redirects to /spa/
+
+- App Shell (Sidebar + Topbar Layout)
+  - Controller: AppShellController
+  - Template: templates/app-shell.html
+  - Used by /app, /app/finance, /app/hrm, /app/procurement, /app/sales
+
+- Dashboard
+  - Controller: DashboardController
+  - Template: templates/dashboard.html
+  - Assets: static/css/dashboard.css, static/js/dashboard.js
+
+- HRM (Human Resource)
+  - Controller: HrmController
+  - Template: templates/hrm-module.html
+  - Assets: static/css/hrm.css, static/js/hrm.js
+
+- Finance & Accounting
+  - Controller: FinanceController
+  - Template: templates/finance-module.html
+  - Assets: static/css/finance.css
+
+- Procurement & Inventory
+  - Controller: ProcurementController
+  - Template: templates/procurement-module.html
+  - Assets: static/css/procurement.css
+
+- Sales & Delivery
+  - Controller: SalesController
+  - Template: templates/sales-module.html
+  - Assets: static/css/sales.css, static/js/sales.js
+
+- SPA Routing
+  - Controller: SpaController
+  - Handles /spa/ and module switching inside the shell
+
+- Supporting Services
+  - AuditLogService: simple audit logging helper
+  - SessionUtil + UserProfile: stores logged-in user session data
+
+4. Data Storage and Tables
+- Uses PostgreSQL via JdbcTemplate (Supabase-hosted)
+- Database bootstrap creates:
+  - tasks
+  - notification_rules
+  - audit_logs
+  - approvals
+- Other tables referenced in controllers:
+  - employees
+  - user_accounts
+  - module-specific tables for finance, procurement, sales (as needed)
+
+5. Desktop Wrapper
+- Class: DesktopLauncher
+- Starts Spring Boot, then loads http://localhost:8080/login in WebView
+- Provides a splash screen and basic WebView configuration
+
+6. How to Run
+- Web app:
+  - From demo/: mvn spring-boot:run
+  - Visit: http://localhost:8080/login
+
+- Desktop app (JavaFX):
+  - From demo/: mvn javafx:run
+
+7. Folder Structure (Key Paths)
+demo/
+  src/main/java/com/example/demo/
+    Application.java
+    DesktopLauncher.java
+    web/ (controllers + services)
+  src/main/resources/
+    templates/ (HTML pages)
+    static/css/ (styles)
+    static/js/ (scripts)
+
+8. Notes
+- Session is cookie-based to avoid ;jsessionid in URLs.
+- Static assets are separated per module for clarity.
+
+End of documentation.

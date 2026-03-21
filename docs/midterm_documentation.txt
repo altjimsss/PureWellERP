@@ -1,0 +1,44 @@
+1. Project Overview
+Module Name: Human Resource Management (HRM) Module
+Module Purpose / Objective: The HRM module centralizes employee information and HR records to support staffing, role assignments, and administrative tracking in one place.
+Description of what the module does: The module provides an HR-focused interface for viewing employee records, filtering staff data, and presenting key HR information in a structured list and detail layout.
+
+2. System Features
+Feature Name: Employee Records List
+Description: Displays a structured list of employees with core HR data for quick review.
+Input / Output: Input: none or default list query; Output: employee list with key fields.
+
+Feature Name: Search and Filter
+Description: Filters employee records by name, role, or department for faster lookup.
+Input / Output: Input: search keyword and filter criteria; Output: filtered employee list.
+
+Feature Name: Employee Profile View
+Description: Shows detailed employee information including role, department, and identifiers.
+Input / Output: Input: selected employee; Output: full employee profile details.
+
+Feature Name: HR Status Indicators
+Description: Highlights HR-related status or labels for quick identification of staff categories.
+Input / Output: Input: employee metadata; Output: status tags or labels in the list.
+
+3. User Interface (GUI) Design
+Main Menu / Dashboard: The HRM module is accessed from the main sidebar and opens to an HR-focused page listing employees.
+Data Entry Forms: HRM uses structured forms for employee data (name, role, department, contact details), with validation for required fields.
+Reports / Viewing Data: The module displays employee records in tables and cards with filters and quick search for usability.
+Screenshot of GUI: Not included per instructions.
+
+4. System Architecture / Workflow
+System Flow Diagram / Process Flow (describe or draw): User logs in → session is created → user navigates to HRM module → HRM controller loads employee data → records are displayed → user applies search/filter → results refresh.
+Database / Data Storage Method: PostgreSQL (Supabase-hosted) accessed via Spring JDBC (JdbcTemplate).
+Tables / Structure: Primary HRM tables include employees and user_accounts, plus supporting tables for audit_logs and approvals where applicable.
+
+5. ERP Concepts Applied
+The HRM module reflects ERP practices by centralizing employee records, roles, and departments into a single system of record. It supports staff visibility, accountability, and standardized HR workflows.
+
+6. Challenges Encountered
+Ensuring consistent HR data display, filtering performance, and session-safe access to employee records were the main challenges during development.
+
+7. Future Improvements
+Add role-based HR dashboards, expand employee analytics (attendance, turnover), and improve filtering and export options for HR reporting.
+
+8. References / Resources
+Spring Boot documentation, Thymeleaf documentation, PostgreSQL/Supabase documentation, and internal project source code.

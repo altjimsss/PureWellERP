@@ -168,26 +168,31 @@ public class DesktopLauncher extends Application {
 				);
 			}
 		});
-		String splashHtml = String.format("""
-				<html>
-				<head><style>
-				body{font-family:"Space Grotesk",Segoe UI,Arial,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:#f7fbff;color:#162432;margin:0}
-				.splash{display:flex;flex-direction:column;align-items:center;gap:16px}
-				.logo{width:64px;height:64px;object-fit:contain}
-				.loader{width:180px;height:4px;border-radius:999px;background:rgba(22,36,50,0.08);overflow:hidden;position:relative}
-				.loader::before{content:"";position:absolute;inset:0;width:40%%;background:#3aa4e0;border-radius:999px;animation:load 1.2s ease-in-out infinite}
-				@keyframes load{0%%{transform:translateX(-120%%)}50%%{transform:translateX(60%%)}100%%{transform:translateX(220%%)}}
-				.caption{font-size:14px;color:#6b7c8f}
-				</style></head>
-				<body>
-					<div class="splash">
-						<img class="logo" src="%s" alt="PureWell ERP">
-						<div class="loader" aria-label="Loading"></div>
-						<div class="caption">Starting PureWell ERP...</div>
-					</div>
-				</body>
-				</html>
-				""", logoDataUrl == null ? "" : logoDataUrl);
+		String splashHtml = String.format(
+				"<html>\n"
+						+ "<head><style>\n"
+						+ "body{font-family:\"Space Grotesk\",Segoe UI,Arial,sans-serif;display:flex;align-items:center;"
+						+ "justify-content:center;height:100vh;background:#f7fbff;color:#162432;margin:0}\n"
+						+ ".splash{display:flex;flex-direction:column;align-items:center;gap:16px}\n"
+						+ ".logo{width:64px;height:64px;object-fit:contain}\n"
+						+ ".loader{width:180px;height:4px;border-radius:999px;background:rgba(22,36,50,0.08);"
+						+ "overflow:hidden;position:relative}\n"
+						+ ".loader::before{content:\"\";position:absolute;inset:0;width:40%%;background:#3aa4e0;"
+						+ "border-radius:999px;animation:load 1.2s ease-in-out infinite}\n"
+						+ "@keyframes load{0%%{transform:translateX(-120%%)}50%%{transform:translateX(60%%)}"
+						+ "100%%{transform:translateX(220%%)}}\n"
+						+ ".caption{font-size:14px;color:#6b7c8f}\n"
+						+ "</style></head>\n"
+						+ "<body>\n"
+						+ "  <div class=\"splash\">\n"
+						+ "    <img class=\"logo\" src=\"%s\" alt=\"PureWell ERP\">\n"
+						+ "    <div class=\"loader\" aria-label=\"Loading\"></div>\n"
+						+ "    <div class=\"caption\">Starting PureWell ERP...</div>\n"
+						+ "  </div>\n"
+						+ "</body>\n"
+						+ "</html>\n",
+				logoDataUrl == null ? "" : logoDataUrl
+		);
 		engine.loadContent(splashHtml);
 
 		StackPane root = new StackPane(webView);

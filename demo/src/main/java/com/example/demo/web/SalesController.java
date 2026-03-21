@@ -164,6 +164,7 @@ public class SalesController {
 			@RequestParam(name = "format", defaultValue = "pdf") String format
 	) throws IOException {
 		Map<String, Object> details = orderDetails(orderId);
+		@SuppressWarnings("unchecked")
 		Map<String, Object> header = details.get("header") instanceof Map<?, ?>
 				? (Map<String, Object>) details.get("header")
 				: Map.of();
