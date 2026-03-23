@@ -125,6 +125,12 @@
 .filter-form .pill {
 	padding: 4px 10px;
 	font-size: 0.7rem;
+	font-weight: 600;
+}
+
+.filter-form .reset-link {
+	font-size: 0.7rem;
+	font-weight: 600;
 }
 
 .filter-form .icon-pill {
@@ -203,6 +209,116 @@
 .finance-card.expenses {
 	grid-column: span 7;
 }
+
+.finance-card.expenses .card-head {
+	flex-direction: row;
+	align-items: center;
+	gap: 12px;
+}
+
+.expense-add-form {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: nowrap;
+}
+
+.expense-add-form .pill {
+	white-space: nowrap;
+}
+
+.pill-expense,
+.pill-record {
+	font-size: 0.68rem;
+	padding: 4px 10px;
+}
+
+.pill-expense {
+	background: #f2d082;
+	color: #5a3d00;
+}
+
+.pill-record {
+	background: #8fe1c2;
+	color: #0f3a2a;
+}
+
+.expense-add-form .filter-input {
+	width: 140px;
+	min-width: 0;
+	padding: 4px 8px;
+	font-size: 0.72rem;
+}
+
+.record-add-form {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	flex-wrap: nowrap;
+}
+
+.record-add-form select,
+.record-add-form .filter-input {
+	width: 120px;
+	min-width: 0;
+	padding: 4px 8px;
+	font-size: 0.72rem;
+}
+
+.record-add-form select,
+.record-add-form .filter-input {
+	min-width: 110px;
+}
+
+.record-add-form .pill {
+	white-space: nowrap;
+}
+
+.finance-card.records .record-add-form {
+	margin-left: auto;
+}
+
+.finance-card.expenses .filter-bar {
+	background: #f9fbff;
+	border: 1px solid rgba(0, 0, 0, 0.06);
+	border-radius: 12px;
+	padding: 10px 12px;
+	flex-wrap: nowrap;
+	gap: 8px;
+	width: fit-content;
+	max-width: 100%;
+	align-self: flex-end;
+	margin-left: auto;
+}
+
+.finance-card.expenses .filter-bar .filter-input,
+.finance-card.expenses .filter-bar select {
+	padding: 5px 10px;
+	font-size: 0.78rem;
+}
+
+.finance-card.expenses .filter-bar .pill,
+.finance-card.expenses .filter-bar .reset-link {
+	font-size: 0.78rem;
+}
+
+.finance-card.records .filter-bar {
+	width: fit-content;
+	max-width: 100%;
+	align-self: flex-start;
+	padding: 8px 10px;
+	min-width: 420px;
+}
+
+.finance-card.records .filter-bar .search-input {
+	min-width: 180px;
+}
+
+.finance-card.records .filter-bar select,
+.finance-card.records .filter-bar .filter-input {
+	min-width: 110px;
+}
+
 
 .finance-card.expense-mix {
 	grid-column: span 5;
@@ -558,6 +674,14 @@ td {
 	.insight-grid {
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
+
+	.expense-add-form {
+		flex-wrap: wrap;
+	}
+
+	.record-add-form {
+		flex-wrap: wrap;
+	}
 }
 
 @media (max-width: 800px) {
@@ -592,5 +716,13 @@ td {
 
 	.reports-table .report-cell {
 		gap: 8px;
+	}
+
+	.expense-add-form {
+		flex-wrap: wrap;
+	}
+
+	.record-add-form {
+		flex-wrap: wrap;
 	}
 }

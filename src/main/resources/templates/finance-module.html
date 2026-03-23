@@ -306,6 +306,13 @@
 							<a class="pill ghost reset-link" href="/modules/finance" data-toast="Filters cleared">Reset all</a>
 						</form>
 					</div>
+					<form class="filter-form expense-add-form" method="post" action="/modules/finance/expenses/add">
+						<input class="filter-input" type="text" name="expenseType" placeholder="Type" required>
+						<input class="filter-input" type="number" name="amount" step="0.01" placeholder="Amount" required>
+						<input class="filter-input" type="date" name="date" required>
+						<input class="filter-input" type="text" name="description" placeholder="Notes">
+						<button class="pill pill-expense" type="submit">Add expense</button>
+					</form>
 					<table>
 						<thead>
 							<tr>
@@ -369,54 +376,51 @@
 				<section class="finance-card records scrollable">
 					<div class="card-head">
 						<h4>Financial Records</h4>
-						<form class="filter-form filter-bar" method="get" action="/modules/finance">
-							<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
-							<input type="hidden" name="expensesView" th:value="${expensesView}">
-							<input type="hidden" name="mixPeriod" th:value="${mixPeriod}">
-							<input type="hidden" name="reportsPeriod" th:value="${reportsPeriod}">
-							<div class="search-input">
-								<span class="search-icon" aria-hidden="true">
-									<svg viewBox="0 0 24 24">
-										<circle cx="11" cy="11" r="7"></circle>
-										<path d="M20 20l-3.5-3.5"></path>
-									</svg>
-								</span>
-								<input class="filter-input" type="text" name="recordsQuery" placeholder="Search records"
-									th:value="${recordsQuery}">
-							</div>
-							<select name="recordsType">
-								<option value="" th:selected="${recordsType == null || recordsType == ''}">All types</option>
-								<option value="Revenue" th:selected="${recordsType == 'Revenue'}">Income</option>
-								<option value="Expense" th:selected="${recordsType == 'Expense'}">Expense</option>
+						<form class="filter-form record-add-form" method="post" action="/modules/finance/records/add">
+							<select name="recordType" required>
+								<option value="" disabled selected>Type</option>
+								<option value="Income">Income</option>
+								<option value="Expense">Expense</option>
 							</select>
-							<div class="date-range">
-								<span class="range-label">Between</span>
-								<input class="filter-input" type="date" name="recordsFrom" th:value="${recordsFrom}">
-								<span class="range-label">and</span>
-								<input class="filter-input" type="date" name="recordsTo" th:value="${recordsTo}">
-							</div>
-							<select name="recordsPeriod">
-								<option value="7" th:selected="${recordsPeriod == '7'}">Last 7 days</option>
-								<option value="30" th:selected="${recordsPeriod == '30'}">Last 30 days</option>
-								<option value="90" th:selected="${recordsPeriod == '90'}">Last 90 days</option>
-								<option value="all" th:selected="${recordsPeriod == 'all'}">All time</option>
-							</select>
-							<select name="recordsView">
-								<option value="recent" th:selected="${recordsView == 'recent'}">Latest 6</option>
-								<option value="all" th:selected="${recordsView == 'all'}">View all</option>
-							</select>
-							<button class="pill ghost" type="submit">Apply</button>
-							<a class="pill ghost icon-pill icon-only" href="/modules/finance" aria-label="Reset filters">
-								<span class="pill-icon">
-									<svg viewBox="0 0 24 24" aria-hidden="true">
-										<path d="M3 12a9 9 0 1 0 3-6.7"/>
-										<path d="M3 3v6h6"/>
-									</svg>
-								</span>
-							</a>
-							<a class="pill ghost reset-link" href="/modules/finance" data-toast="Filters cleared">Reset all</a>
+							<input class="filter-input" type="number" name="amount" step="0.01" placeholder="Amount" required>
+							<input class="filter-input" type="date" name="date" required>
+							<input class="filter-input" type="text" name="notes" placeholder="Notes">
+							<button class="pill pill-record" type="submit">Add record</button>
 						</form>
 					</div>
+					<form class="filter-form filter-bar" method="get" action="/modules/finance">
+						<input type="hidden" name="expensesPeriod" th:value="${expensesPeriod}">
+						<input type="hidden" name="expensesView" th:value="${expensesView}">
+						<input type="hidden" name="mixPeriod" th:value="${mixPeriod}">
+						<input type="hidden" name="reportsPeriod" th:value="${reportsPeriod}">
+						<div class="search-input">
+							<span class="search-icon" aria-hidden="true">
+								<svg viewBox="0 0 24 24">
+									<circle cx="11" cy="11" r="7"></circle>
+									<path d="M20 20l-3.5-3.5"></path>
+								</svg>
+							</span>
+							<input class="filter-input" type="text" name="recordsQuery" placeholder="Search records"
+								th:value="${recordsQuery}">
+						</div>
+						<select name="recordsType">
+							<option value="" th:selected="${recordsType == null || recordsType == ''}">All types</option>
+							<option value="Income" th:selected="${recordsType == 'Income'}">Income</option>
+							<option value="Expense" th:selected="${recordsType == 'Expense'}">Expense</option>
+						</select>
+						<select name="recordsPeriod">
+							<option value="7" th:selected="${recordsPeriod == '7'}">Last 7 days</option>
+							<option value="30" th:selected="${recordsPeriod == '30'}">Last 30 days</option>
+							<option value="90" th:selected="${recordsPeriod == '90'}">Last 90 days</option>
+							<option value="all" th:selected="${recordsPeriod == 'all'}">All time</option>
+						</select>
+						<select name="recordsView">
+							<option value="recent" th:selected="${recordsView == 'recent'}">Latest 6</option>
+							<option value="all" th:selected="${recordsView == 'all'}">View all</option>
+						</select>
+						<button class="pill ghost" type="submit">Apply</button>
+						<a class="pill ghost reset-link" href="/modules/finance" data-toast="Filters cleared">Reset all</a>
+					</form>
 				<table>
 					<thead>
 						<tr>
@@ -432,8 +436,8 @@
 							th:attr="data-record-id=${record.id},data-record-type=${record.type},data-record-amount=${record.amount},data-record-date=${record.date},data-record-notes=${record.notes}">
 							<td th:text="${record.date}">2026-03-10</td>
 							<td>
-								<span class="tag" th:classappend="${record.type == 'Revenue'} ? ' good' : ' warn'"
-									th:text="${record.type}">Revenue</span>
+								<span class="tag" th:classappend="${record.type == 'Income'} ? ' good' : ' warn'"
+									th:text="${record.type}">Income</span>
 							</td>
 							<td class="mono" th:text="${#numbers.formatDecimal(record.amount,1,2)}">0.00</td>
 							<td th:text="${record.notes}">Record note</td>
@@ -527,48 +531,49 @@
 			<p class="footer-note">
 				Finance module data is pulled directly from the database tables for expenses and financial records.
 			</p>
+
+			<div class="modal-backdrop record-edit-modal" id="record-edit-modal" aria-hidden="true">
+				<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="record-edit-title">
+					<h4 id="record-edit-title">Edit Financial Record</h4>
+					<form class="modal-form" method="post" action="/modules/finance/records/update">
+						<input type="hidden" name="recordId" id="record-edit-id">
+						<div class="field">
+							<label for="record-edit-type">Type</label>
+							<input id="record-edit-type" name="recordType" type="text" required>
+						</div>
+						<div class="field">
+							<label for="record-edit-amount">Amount</label>
+							<input id="record-edit-amount" name="amount" type="number" step="0.01" required>
+						</div>
+						<div class="field">
+							<label for="record-edit-date">Date</label>
+							<input id="record-edit-date" name="date" type="date" required>
+						</div>
+						<div class="field">
+							<label for="record-edit-notes">Notes</label>
+							<input id="record-edit-notes" name="notes" type="text">
+						</div>
+						<div class="modal-actions">
+							<button class="modal-btn" type="button" data-record-edit-cancel>Cancel</button>
+							<button class="modal-btn primary" type="submit">Save changes</button>
+						</div>
+					</form>
+				</div>
+			</div>
+			<div class="modal-backdrop record-delete-modal" id="record-delete-modal" aria-hidden="true">
+				<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="record-delete-title">
+					<h4 id="record-delete-title">Delete Financial Record</h4>
+					<p>This action cannot be undone. Do you want to delete this record?</p>
+					<form method="post" action="/modules/finance/records/delete">
+						<input type="hidden" name="recordId" id="record-delete-id">
+						<div class="modal-actions">
+							<button class="modal-btn" type="button" data-record-delete-cancel>Cancel</button>
+							<button class="modal-btn primary" type="submit">Delete</button>
+						</div>
+					</form>
+				</div>
+			</div>
 		</main>
-	</div>
-	<div class="modal-backdrop record-edit-modal" id="record-edit-modal" aria-hidden="true">
-		<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="record-edit-title">
-			<h4 id="record-edit-title">Edit Financial Record</h4>
-			<form class="modal-form" method="post" action="/modules/finance/records/update">
-				<input type="hidden" name="recordId" id="record-edit-id">
-				<div class="field">
-					<label for="record-edit-type">Type</label>
-					<input id="record-edit-type" name="recordType" type="text" required>
-				</div>
-				<div class="field">
-					<label for="record-edit-amount">Amount</label>
-					<input id="record-edit-amount" name="amount" type="number" step="0.01" required>
-				</div>
-				<div class="field">
-					<label for="record-edit-date">Date</label>
-					<input id="record-edit-date" name="date" type="date" required>
-				</div>
-				<div class="field">
-					<label for="record-edit-notes">Notes</label>
-					<input id="record-edit-notes" name="notes" type="text">
-				</div>
-				<div class="modal-actions">
-					<button class="modal-btn" type="button" data-record-edit-cancel>Cancel</button>
-					<button class="modal-btn primary" type="submit">Save changes</button>
-				</div>
-			</form>
-		</div>
-	</div>
-	<div class="modal-backdrop record-delete-modal" id="record-delete-modal" aria-hidden="true">
-		<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="record-delete-title">
-			<h4 id="record-delete-title">Delete Financial Record</h4>
-			<p>This action cannot be undone. Do you want to delete this record?</p>
-			<form method="post" action="/modules/finance/records/delete">
-				<input type="hidden" name="recordId" id="record-delete-id">
-				<div class="modal-actions">
-					<button class="modal-btn" type="button" data-record-delete-cancel>Cancel</button>
-					<button class="modal-btn primary" type="submit">Delete</button>
-				</div>
-			</form>
-		</div>
 	</div>
 	<div class="modal-backdrop" id="signout-modal" aria-hidden="true">
 		<div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="signout-title">
@@ -584,71 +589,104 @@
 	<script src="/js/ui-animate.js"></script>
 	<script src="/js/vendor/chart.umd.min.js"></script>
 	<script>
-		const editModal = document.getElementById("record-edit-modal");
-		const editButtons = document.querySelectorAll("[data-record-edit]");
-		const cancelEdit = editModal.querySelector("[data-record-edit-cancel]");
-		const deleteModal = document.getElementById("record-delete-modal");
-		const deleteButtons = document.querySelectorAll("[data-record-delete]");
-		const cancelDelete = deleteModal.querySelector("[data-record-delete-cancel]");
+		const initFinanceRecordActions = () => {
+			const editModal = document.getElementById("record-edit-modal");
+			const deleteModal = document.getElementById("record-delete-modal");
+			if (!editModal || !deleteModal) {
+				return;
+			}
+			if (editModal.parentElement !== document.body) {
+				document.body.appendChild(editModal);
+			}
+			if (deleteModal.parentElement !== document.body) {
+				document.body.appendChild(deleteModal);
+			}
+			if (editModal.dataset.bound === "true") {
+				return;
+			}
+			editModal.dataset.bound = "true";
 
-		const editId = document.getElementById("record-edit-id");
-		const editType = document.getElementById("record-edit-type");
-		const editAmount = document.getElementById("record-edit-amount");
-		const editDate = document.getElementById("record-edit-date");
-		const editNotes = document.getElementById("record-edit-notes");
-		const deleteId = document.getElementById("record-delete-id");
+			const closestMatch = (node, selector) => {
+				let current = node;
+				while (current) {
+					if (current.matches && current.matches(selector)) {
+						return current;
+					}
+					current = current.parentElement || current.parentNode;
+				}
+				return null;
+			};
 
-		const closeEditModal = () => {
-			editModal.classList.remove("is-visible");
-			editModal.setAttribute("aria-hidden", "true");
-		};
+			const editId = document.getElementById("record-edit-id");
+			const editType = document.getElementById("record-edit-type");
+			const editAmount = document.getElementById("record-edit-amount");
+			const editDate = document.getElementById("record-edit-date");
+			const editNotes = document.getElementById("record-edit-notes");
+			const deleteId = document.getElementById("record-delete-id");
 
-		const closeDeleteModal = () => {
-			deleteModal.classList.remove("is-visible");
-			deleteModal.setAttribute("aria-hidden", "true");
-		};
+			const closeEditModal = () => {
+				editModal.classList.remove("is-visible");
+				editModal.setAttribute("aria-hidden", "true");
+			};
 
-		editButtons.forEach((button) => {
-			button.addEventListener("click", () => {
-				const row = button.closest("tr");
-				if (!row) {
+			const closeDeleteModal = () => {
+				deleteModal.classList.remove("is-visible");
+				deleteModal.setAttribute("aria-hidden", "true");
+			};
+
+			document.addEventListener("click", (event) => {
+				const editButton = closestMatch(event.target, "[data-record-edit]");
+				if (editButton) {
+					const row = editButton.closest("tr");
+					if (!row) {
+						return;
+					}
+					editId.value = row.dataset.recordId || "";
+					editType.value = row.dataset.recordType || "";
+					editAmount.value = row.dataset.recordAmount || "";
+					editDate.value = row.dataset.recordDate || "";
+					editNotes.value = row.dataset.recordNotes || "";
+					editModal.classList.add("is-visible");
+					editModal.setAttribute("aria-hidden", "false");
 					return;
 				}
-				editId.value = row.dataset.recordId || "";
-				editType.value = row.dataset.recordType || "";
-				editAmount.value = row.dataset.recordAmount || "";
-				editDate.value = row.dataset.recordDate || "";
-				editNotes.value = row.dataset.recordNotes || "";
-				editModal.classList.add("is-visible");
-				editModal.setAttribute("aria-hidden", "false");
-			});
-		});
 
-		deleteButtons.forEach((button) => {
-			button.addEventListener("click", () => {
-				const row = button.closest("tr");
-				if (!row) {
-					return;
+				const deleteButton = closestMatch(event.target, "[data-record-delete]");
+				if (deleteButton) {
+					const row = deleteButton.closest("tr");
+					if (!row) {
+						return;
+					}
+					deleteId.value = row.dataset.recordId || "";
+					deleteModal.classList.add("is-visible");
+					deleteModal.setAttribute("aria-hidden", "false");
 				}
-				deleteId.value = row.dataset.recordId || "";
-				deleteModal.classList.add("is-visible");
-				deleteModal.setAttribute("aria-hidden", "false");
 			});
-		});
 
-		cancelEdit.addEventListener("click", closeEditModal);
-		editModal.addEventListener("click", (event) => {
-			if (event.target === editModal) {
-				closeEditModal();
-			}
-		});
+			const cancelEdit = editModal.querySelector("[data-record-edit-cancel]");
+			const cancelDelete = deleteModal.querySelector("[data-record-delete-cancel]");
 
-		cancelDelete.addEventListener("click", closeDeleteModal);
-		deleteModal.addEventListener("click", (event) => {
-			if (event.target === deleteModal) {
-				closeDeleteModal();
-			}
-		});
+			cancelEdit.addEventListener("click", closeEditModal);
+			editModal.addEventListener("click", (event) => {
+				if (event.target === editModal) {
+					closeEditModal();
+				}
+			});
+
+			cancelDelete.addEventListener("click", closeDeleteModal);
+			deleteModal.addEventListener("click", (event) => {
+				if (event.target === deleteModal) {
+					closeDeleteModal();
+				}
+			});
+		};
+
+		if (document.readyState === "loading") {
+			document.addEventListener("DOMContentLoaded", initFinanceRecordActions);
+		} else {
+			initFinanceRecordActions();
+		}
+		window.addEventListener("spa:content", initFinanceRecordActions);
 
 			const renderExpensePie = () => {
 				const dataRoot = document.getElementById("expense-pie-data");
@@ -841,6 +879,50 @@
 
 		renderExpensePie();
 		renderIncomeExpenseChart();
+
+		(() => {
+			const params = new URLSearchParams(window.location.search);
+			const recordStatus = params.get("recordStatus");
+			const expenseStatus = params.get("expenseStatus");
+
+			const ensureToastStack = () => {
+				let stack = document.querySelector(".toast-stack");
+				if (!stack) {
+					stack = document.createElement("div");
+					stack.className = "toast-stack";
+					document.body.appendChild(stack);
+				}
+				return stack;
+			};
+
+			const showToast = (message) => {
+				if (!message) {
+					return;
+				}
+				const stack = ensureToastStack();
+				const toast = document.createElement("div");
+				toast.className = "toast";
+				toast.textContent = message;
+				stack.appendChild(toast);
+				setTimeout(() => {
+					toast.style.opacity = "0";
+					toast.style.transform = "translateY(6px)";
+					setTimeout(() => toast.remove(), 250);
+				}, 1600);
+			};
+
+			if (recordStatus === "success") {
+				showToast("Record added.");
+			} else if (recordStatus === "error") {
+				showToast("Failed to add record.");
+			}
+
+			if (expenseStatus === "success") {
+				showToast("Expense added.");
+			} else if (expenseStatus === "error") {
+				showToast("Failed to add expense.");
+			}
+		})();
 	</script>
 </body>
 </html>

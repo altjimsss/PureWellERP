@@ -152,7 +152,7 @@ public class FinanceController {
 				set record_type = ?, amount = ?, date = ?, notes = ?
 				where id = ?
 				""",
-				recordType,
+				normalizeRecordType(recordType),
 				amount,
 				LocalDate.parse(date),
 				notes,
@@ -161,26 +161,88 @@ public class FinanceController {
 		return "redirect:/modules/finance";
 	}
 
+	@PostMapping("/modules/finance/records/add")
+	public String addFinancialRecord(
+			@RequestParam("recordType") String recordType,
+			@RequestParam("amount") BigDecimal amount,
+			@RequestParam("date") String date,
+			@RequestParam(name = "notes", required = false) String notes
+	) {
+		try {
+			jdbcTemplate.update(
+					"""
+					insert into financial_records(record_type, amount, date, notes)
+					values(?, ?, ?, ?)
+					""",
+					normalizeRecordType(recordType),
+					amount,
+					LocalDate.parse(date),
+					notes
+			);
+			return "redirect:/modules/finance?recordStatus=success";
+		} catch (DataAccessException ex) {
+			return "redirect:/modules/finance?recordStatus=error";
+		}
+	}
+
 	@PostMapping("/modules/finance/records/delete")
 	public String deleteFinancialRecord(@RequestParam("recordId") Integer recordId) {
 		jdbcTemplate.update("delete from financial_records where id = ?", recordId);
 		return "redirect:/modules/finance";
 	}
 
+	@PostMapping("/modules/finance/expenses/add")
+	public String addExpense(
+			@RequestParam("expenseType") String expenseType,
+			@RequestParam("amount") BigDecimal amount,
+			@RequestParam("date") String date,
+			@RequestParam(name = "description", required = false) String description
+	) {
+		try {
+			jdbcTemplate.update(
+					"""
+					insert into expenses(expense_type, amount, date, description)
+					values(?, ?, ?, ?)
+					""",
+					expenseType,
+					amount,
+					LocalDate.parse(date),
+					description
+			);
+			return "redirect:/modules/finance?expenseStatus=success";
+		} catch (DataAccessException ex) {
+			return "redirect:/modules/finance?expenseStatus=error";
+		}
+	}
+
 	private FinanceSnapshot loadSnapshot() {
 		Double revenue = jdbcTemplate.queryForObject(
 				"""
-				select coalesce(sum(amount),0)
-				from financial_records
-				where record_type = 'Revenue'
-				  and date >= current_date - interval '30 days'
+				select coalesce((
+					select sum(oi.quantity * oi.price)
+					from orders o
+					join order_items oi on oi.order_id = o.id
+					where o.order_date >= now() - interval '30 days'
+				),0) + coalesce((
+					select sum(amount)
+					from financial_records
+					where record_type = 'Income'
+					  and date >= current_date - interval '30 days'
+				),0) as total_revenue
 				""",
 				Double.class);
 		Double expenses = jdbcTemplate.queryForObject(
 				"""
-				select coalesce(sum(amount),0)
-				from expenses
-				where date >= current_date - interval '30 days'
+				select coalesce((
+					select sum(amount)
+					from expenses
+					where date >= current_date - interval '30 days'
+				),0) + coalesce((
+					select sum(amount)
+					from financial_records
+					where record_type = 'Expense'
+					  and date >= current_date - interval '30 days'
+				),0) as total_expenses
 				""",
 				Double.class);
 		Double avgDailyExpense = jdbcTemplate.queryForObject(
@@ -226,34 +288,64 @@ public class FinanceController {
 	private FinanceInsights loadInsights() {
 		Double revenueLast7 = jdbcTemplate.queryForObject(
 				"""
-				select coalesce(sum(amount),0)
-				from financial_records
-				where record_type = 'Revenue'
-				  and date >= current_date - interval '7 days'
+				select coalesce((
+					select sum(oi.quantity * oi.price)
+					from orders o
+					join order_items oi on oi.order_id = o.id
+					where o.order_date >= now() - interval '7 days'
+				),0) + coalesce((
+					select sum(amount)
+					from financial_records
+					where record_type = 'Income'
+					  and date >= current_date - interval '7 days'
+				),0) as total_revenue
 				""",
 				Double.class);
 		Double revenuePrev7 = jdbcTemplate.queryForObject(
 				"""
-				select coalesce(sum(amount),0)
-				from financial_records
-				where record_type = 'Revenue'
-				  and date >= current_date - interval '14 days'
-				  and date < current_date - interval '7 days'
+				select coalesce((
+					select sum(oi.quantity * oi.price)
+					from orders o
+					join order_items oi on oi.order_id = o.id
+					where o.order_date >= now() - interval '14 days'
+					  and o.order_date < now() - interval '7 days'
+				),0) + coalesce((
+					select sum(amount)
+					from financial_records
+					where record_type = 'Income'
+					  and date >= current_date - interval '14 days'
+					  and date < current_date - interval '7 days'
+				),0) as total_revenue
 				""",
 				Double.class);
 		Double expenseLast7 = jdbcTemplate.queryForObject(
 				"""
-				select coalesce(sum(amount),0)
-				from expenses
-				where date >= current_date - interval '7 days'
+				select coalesce((
+					select sum(amount)
+					from expenses
+					where date >= current_date - interval '7 days'
+				),0) + coalesce((
+					select sum(amount)
+					from financial_records
+					where record_type = 'Expense'
+					  and date >= current_date - interval '7 days'
+				),0) as total_expenses
 				""",
 				Double.class);
 		Double expensePrev7 = jdbcTemplate.queryForObject(
 				"""
-				select coalesce(sum(amount),0)
-				from expenses
-				where date >= current_date - interval '14 days'
-				  and date < current_date - interval '7 days'
+				select coalesce((
+					select sum(amount)
+					from expenses
+					where date >= current_date - interval '14 days'
+					  and date < current_date - interval '7 days'
+				),0) + coalesce((
+					select sum(amount)
+					from financial_records
+					where record_type = 'Expense'
+					  and date >= current_date - interval '14 days'
+					  and date < current_date - interval '7 days'
+				),0) as total_expenses
 				""",
 				Double.class);
 
@@ -274,11 +366,21 @@ public class FinanceController {
 
 		DailyRevenueSummary bestDay = jdbcTemplate.query(
 				"""
-				select to_char(date, 'Dy') as label, sum(amount) as total
-				from financial_records
-				where record_type = 'Revenue'
-				  and date >= current_date - interval '7 days'
-				group by to_char(date, 'Dy')
+				select label, sum(total) as total
+				from (
+					select to_char(o.order_date, 'Dy') as label, sum(oi.quantity * oi.price) as total
+					from orders o
+					join order_items oi on oi.order_id = o.id
+					where o.order_date >= now() - interval '7 days'
+					group by to_char(o.order_date, 'Dy')
+					union all
+					select to_char(fr.date, 'Dy') as label, sum(fr.amount) as total
+					from financial_records fr
+					where fr.record_type = 'Income'
+					  and fr.date >= current_date - interval '7 days'
+					group by to_char(fr.date, 'Dy')
+				) t
+				group by label
 				order by total desc
 				limit 1
 				""",
@@ -339,7 +441,14 @@ public class FinanceController {
 			String toDate
 	) {
 		StringBuilder sql = new StringBuilder(
-				"select id, record_type, amount, date, notes from financial_records");
+				"""
+				select id,
+				       case when record_type = 'Revenue' then 'Income' else record_type end as record_type,
+				       amount,
+				       date,
+				       notes
+				from financial_records
+				""");
 		List<Object> params = new java.util.ArrayList<>();
 		boolean hasWhere = false;
 		if (days != null) {
@@ -349,7 +458,8 @@ public class FinanceController {
 		}
 		if (type != null) {
 			sql.append(hasWhere ? " and " : " where ");
-			sql.append("record_type = ?");
+			sql.append("(record_type = ? or (record_type = 'Revenue' and ? = 'Income'))");
+			params.add(type);
 			params.add(type);
 			hasWhere = true;
 		}
@@ -428,15 +538,25 @@ public class FinanceController {
 				select m.month_start,
 				       to_char(m.month_start, 'Mon YYYY') as label,
 				       coalesce((
-				         select sum(amount)
+				         select sum(oi.quantity * oi.price)
+				         from orders o
+				         join order_items oi on oi.order_id = o.id
+				         where date_trunc('month', o.order_date) = m.month_start
+				       ),0) + coalesce((
+				         select sum(fr.amount)
 				         from financial_records fr
-				         where fr.record_type = 'Revenue'
+				         where fr.record_type = 'Income'
 				           and date_trunc('month', fr.date) = m.month_start
 				       ),0) as revenue,
 				       coalesce((
 				         select sum(amount)
 				         from expenses e
 				         where date_trunc('month', e.date) = m.month_start
+				       ),0) + coalesce((
+				         select sum(fr.amount)
+				         from financial_records fr
+				         where fr.record_type = 'Expense'
+				           and date_trunc('month', fr.date) = m.month_start
 				       ),0) as expenses
 				from (
 					select date_trunc('month', current_date) - ((? - 1) * interval '1 month')
@@ -522,6 +642,20 @@ public class FinanceController {
 		return normalized.isEmpty() ? null : normalized;
 	}
 
+	private static String normalizeRecordType(String recordType) {
+		if (recordType == null) {
+			return null;
+		}
+		String normalized = recordType.trim();
+		if (normalized.equalsIgnoreCase("revenue")) {
+			return "Income";
+		}
+		if (normalized.equalsIgnoreCase("income")) {
+			return "Income";
+		}
+		return normalized;
+	}
+
 	private int parseMonthsPeriod(String value) {
 		if (value == null) {
 			return 6;
@@ -554,6 +688,8 @@ public class FinanceController {
 					select min(date) as d from expenses
 					union all
 					select min(date) as d from financial_records
+					union all
+					select min(order_date::date) as d from orders
 				) t
 				""",
 				(rs, rowNum) -> {
