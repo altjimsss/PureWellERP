@@ -1,23 +1,59 @@
 {
-  "name": "spa-react",
+  "name": "purewell-erp",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "main": "electron-main.cjs",
+  "homepage": "./",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "web-build": "tsc && vite build",
+    "preview": "vite preview",
+    "electron-dev": "tsc && concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
+    "electron-build": "tsc && vite build && electron-builder --win --publish never -c.forceCodeSigning=false"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "electron": "^41.2.1",
+    "electron-builder": "^26.8.1",
+    "electron-is-dev": "^3.0.1",
+    "png-to-ico": "^3.0.1",
+    "rcedit": "^5.0.2",
     "typescript": "~5.9.3",
-    "vite": "^8.0.1"
+    "vite": "^8.0.1",
+    "wait-on": "^8.0.5"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.10.2",
+    "@supabase/supabase-js": "^2.103.3",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.1"
+  },
+  "build": {
+    "appId": "com.purewell.erp",
+    "productName": "PureWell ERP",
+    "files": [
+      "electron-dist",
+      "electron-main.cjs",
+      "electron-preload.cjs",
+      "package.json",
+      "../target/demo-0.0.1-SNAPSHOT.jar",
+      "node_modules/**/*"
+    ],
+    "directories": {
+      "buildResources": "public"
+    },
+    "win": {
+      "target": [
+        "portable"
+      ],
+      "icon": "purewelllogo.ico",
+      "forceCodeSigning": false
+    }
   }
 }

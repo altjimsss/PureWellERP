@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class ProcurementController {
 
 	private final JdbcTemplate jdbcTemplate;
+	private final AuditLogService auditLogService;
 
-	public ProcurementController(JdbcTemplate jdbcTemplate) {
+	public ProcurementController(JdbcTemplate jdbcTemplate, AuditLogService auditLogService) {
 		this.jdbcTemplate = jdbcTemplate;
+		this.auditLogService = auditLogService;
 	}
 
 	@GetMapping("/modules/procurement")
@@ -68,8 +70,17 @@ public class ProcurementController {
 	public String addSupplier(
 			@RequestParam("name") String name,
 			@RequestParam("contact") String contact,
-			@RequestParam("address") String address
+			@RequestParam("address") String address,
+			HttpSession session
 	) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "Supplier", null, "Unauthorized supplier create attempt", userProfile);
+			return "redirect:/modules/procurement?error=forbidden";
+		}
 		jdbcTemplate.update(
 				"""
 				insert into suppliers (name, contact, address)
@@ -79,14 +90,24 @@ public class ProcurementController {
 				contact,
 				address
 		);
+		auditLogService.log("CREATE", "Supplier", null, "Created supplier: " + name, userProfile);
 		return "redirect:/modules/procurement";
 	}
 
 	@PostMapping("/modules/procurement/suppliers/delete")
-	public String removeSupplier(@RequestParam("supplierId") Integer supplierId) {
+	public String removeSupplier(@RequestParam("supplierId") Integer supplierId, HttpSession session) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "Supplier", String.valueOf(supplierId), "Unauthorized supplier delete attempt", userProfile);
+			return "redirect:/modules/procurement?error=forbidden";
+		}
 		jdbcTemplate.update("delete from purchase_orders where supplier_id = ?", supplierId);
 		jdbcTemplate.update("delete from products where supplier_id = ?", supplierId);
 		jdbcTemplate.update("delete from suppliers where id = ?", supplierId);
+		auditLogService.log("DELETE", "Supplier", String.valueOf(supplierId), "Deleted supplier and related records", userProfile);
 		return "redirect:/modules/procurement";
 	}
 
@@ -96,8 +117,17 @@ public class ProcurementController {
 			@RequestParam("type") String type,
 			@RequestParam("price") BigDecimal price,
 			@RequestParam("stock") Integer stock,
-			@RequestParam(name = "supplierId", required = false) Integer supplierId
+			@RequestParam(name = "supplierId", required = false) Integer supplierId,
+			HttpSession session
 	) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "Product", null, "Unauthorized product create attempt", userProfile);
+			return "redirect:/modules/procurement?error=forbidden";
+		}
 		jdbcTemplate.update(
 				"""
 				insert into products (name, type, price, stock, supplier_id)
@@ -109,27 +139,51 @@ public class ProcurementController {
 				stock,
 				supplierId
 		);
+		auditLogService.log("CREATE", "Product", null, "Created product: " + name, userProfile);
 		return "redirect:/modules/procurement";
 	}
 
 	@PostMapping("/modules/procurement/products/delete")
-	public String removeProduct(@RequestParam("productId") Integer productId) {
+	public String removeProduct(@RequestParam("productId") Integer productId, HttpSession session) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "Product", String.valueOf(productId), "Unauthorized product delete attempt", userProfile);
+			return "redirect:/modules/procurement?error=forbidden";
+		}
 		jdbcTemplate.update("delete from purchase_orders where product_id = ?", productId);
 		jdbcTemplate.update("delete from products where id = ?", productId);
+		auditLogService.log("DELETE", "Product", String.valueOf(productId), "Deleted product and related purchase orders", userProfile);
 		return "redirect:/modules/procurement";
 	}
 
 	@PostMapping("/modules/procurement/purchase-orders/status")
 	public String updatePurchaseOrderStatus(
 			@RequestParam("orderId") Integer orderId,
-			@RequestParam("status") String status
+			@RequestParam("status") String status,
+			HttpSession session
 	) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "PurchaseOrder", String.valueOf(orderId), "Unauthorized status update attempt", userProfile);
+			return "redirect:/modules/procurement?error=forbidden";
+		}
 		jdbcTemplate.update(
 				"update purchase_orders set status = ? where id = ?",
 				status,
 				orderId
 		);
+		auditLogService.log("UPDATE", "PurchaseOrder", String.valueOf(orderId), "Updated PO status to " + status, userProfile);
 		return "redirect:/modules/procurement";
+	}
+
+	private boolean isAdmin(UserProfile userProfile) {
+		return userProfile != null && "Admin".equalsIgnoreCase(userProfile.role());
 	}
 
 	private ProcurementSnapshot loadSnapshot() {
@@ -156,8 +210,10 @@ public class ProcurementController {
 	private List<SupplierRow> loadSuppliers(Integer limit) {
 		StringBuilder sql = new StringBuilder(
 				"select id, name, contact, address from suppliers order by id desc");
+		List<Object> params = new java.util.ArrayList<>();
 		if (limit != null) {
-			sql.append(" limit ").append(limit);
+			sql.append(" limit ?");
+			params.add(limit);
 		}
 		return jdbcTemplate.query(
 				sql.toString(),
@@ -166,7 +222,8 @@ public class ProcurementController {
 						rs.getString("name"),
 						rs.getString("contact"),
 						rs.getString("address")
-				)
+				),
+				params.toArray()
 		);
 	}
 
@@ -183,14 +240,15 @@ public class ProcurementController {
 				join suppliers s on po.supplier_id = s.id
 				join products p on po.product_id = p.id
 				""");
-		Object[] params = new Object[] {};
+		List<Object> params = new java.util.ArrayList<>();
 		if (days != null) {
 			sql.append(" where po.order_date >= current_date - (? * interval '1 day')");
-			params = new Object[] { days };
+			params.add(days);
 		}
 		sql.append(" order by po.order_date desc, po.id desc");
 		if (limit != null) {
-			sql.append(" limit ").append(limit);
+			sql.append(" limit ?");
+			params.add(limit);
 		}
 		return jdbcTemplate.query(
 				sql.toString(),
@@ -202,7 +260,7 @@ public class ProcurementController {
 						rs.getDate("order_date").toLocalDate(),
 						rs.getString("status")
 				),
-				params
+				params.toArray()
 		);
 	}
 

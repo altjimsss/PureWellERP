@@ -113,14 +113,27 @@ document.addEventListener("DOMContentLoaded", () => {
 			row.className = "benefit-row";
 			row.dataset.type = type;
 			row.dataset.amount = amountValue.toString();
-			row.innerHTML = `
-				<div>
-					<strong>${item}</strong>
-					<div class="tag ${type === "benefit" ? "good" : "warn"}">${type}</div>
-				</div>
-				<div class="mono">${formatMoney(amountValue)}</div>
-				<button type="button" aria-label="Remove">Remove</button>
-			`;
+			const left = document.createElement("div");
+			const strong = document.createElement("strong");
+			strong.textContent = item;
+			const tag = document.createElement("div");
+			tag.className = `tag ${type === "benefit" ? "good" : "warn"}`;
+			tag.textContent = type;
+			left.appendChild(strong);
+			left.appendChild(tag);
+
+			const amount = document.createElement("div");
+			amount.className = "mono";
+			amount.textContent = formatMoney(amountValue);
+
+			const removeButton = document.createElement("button");
+			removeButton.type = "button";
+			removeButton.setAttribute("aria-label", "Remove");
+			removeButton.textContent = "Remove";
+
+			row.appendChild(left);
+			row.appendChild(amount);
+			row.appendChild(removeButton);
 			benefitsList.querySelector(".empty-note")?.remove();
 			benefitsList.appendChild(row);
 			updateBenefitsTotals();

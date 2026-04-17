@@ -1,11 +1,14 @@
 package com.example.demo.web;
 
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseBootstrap {
+	private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseBootstrap.class);
 	private final JdbcTemplate jdbcTemplate;
 
 	public DatabaseBootstrap(JdbcTemplate jdbcTemplate) {
@@ -14,7 +17,8 @@ public class DatabaseBootstrap {
 
 	@PostConstruct
 	public void ensureTables() {
-		jdbcTemplate.execute(
+		try {
+			jdbcTemplate.execute(
 				"""
 				create table if not exists tasks (
 					id serial primary key,
@@ -26,8 +30,8 @@ public class DatabaseBootstrap {
 					created_by integer
 				)
 				"""
-		);
-		jdbcTemplate.execute(
+			);
+			jdbcTemplate.execute(
 				"""
 				create table if not exists notification_rules (
 					id serial primary key,
@@ -39,8 +43,8 @@ public class DatabaseBootstrap {
 					created_by integer
 				)
 				"""
-		);
-		jdbcTemplate.execute(
+			);
+			jdbcTemplate.execute(
 				"""
 				create table if not exists audit_logs (
 					id serial primary key,
@@ -54,8 +58,8 @@ public class DatabaseBootstrap {
 					actor_role text
 				)
 				"""
-		);
-		jdbcTemplate.execute(
+			);
+			jdbcTemplate.execute(
 				"""
 				create table if not exists approvals (
 					id serial primary key,
@@ -69,6 +73,9 @@ public class DatabaseBootstrap {
 					notes text
 				)
 				"""
-		);
+			);
+		} catch (Exception ex) {
+			LOGGER.warn("Skipping table bootstrap because the database connection is unavailable: {}", ex.getMessage());
+		}
 	}
 }

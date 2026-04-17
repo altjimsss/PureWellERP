@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class HrmController {
 
 	private final JdbcTemplate jdbcTemplate;
+	private final AuditLogService auditLogService;
 
-	public HrmController(JdbcTemplate jdbcTemplate) {
+	public HrmController(JdbcTemplate jdbcTemplate, AuditLogService auditLogService) {
 		this.jdbcTemplate = jdbcTemplate;
+		this.auditLogService = auditLogService;
 	}
 
 	@GetMapping("/modules/hrm")
@@ -67,8 +69,13 @@ public class HrmController {
 			@RequestParam("position") String position,
 			@RequestParam("department") String department,
 			@RequestParam("hireDate") String hireDate,
-			@RequestParam("salary") Double salary
+			@RequestParam("salary") Double salary,
+			HttpSession session
 	) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
 		jdbcTemplate.update(
 				"""
 				insert into employees (first_name, last_name, position, department, hire_date, salary)
@@ -81,15 +88,47 @@ public class HrmController {
 				LocalDate.parse(hireDate),
 				salary
 		);
+		auditLogService.log(
+				"CREATE",
+				"Employee",
+				null,
+				"Added employee: " + firstName + " " + lastName,
+				userProfile
+		);
 		return "redirect:/modules/hrm";
 	}
 
 	@PostMapping("/modules/hrm/employees/delete")
-	public String removeEmployee(@RequestParam("employeeId") Integer employeeId) {
+	public String removeEmployee(@RequestParam("employeeId") Integer employeeId, HttpSession session) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log(
+					"DENY",
+					"Employee",
+					String.valueOf(employeeId),
+					"Unauthorized delete attempt",
+					userProfile
+			);
+			return "redirect:/modules/hrm?error=forbidden";
+		}
 		jdbcTemplate.update("delete from attendance where employee_id = ?", employeeId);
 		jdbcTemplate.update("delete from attendance_summary where employee_id = ?", employeeId);
 		jdbcTemplate.update("delete from employees where id = ?", employeeId);
+		auditLogService.log(
+				"DELETE",
+				"Employee",
+				String.valueOf(employeeId),
+				"Deleted employee and related attendance records",
+				userProfile
+		);
 		return "redirect:/modules/hrm";
+	}
+
+	private boolean isAdmin(UserProfile userProfile) {
+		return userProfile != null && "Admin".equalsIgnoreCase(userProfile.role());
 	}
 
 	private List<Map<String, Object>> payrollFeatures() {

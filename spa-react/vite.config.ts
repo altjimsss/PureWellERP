@@ -3,9 +3,9 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/spa/',
+  base: './',
   build: {
-    outDir: '../src/main/resources/static/spa',
+    outDir: 'electron-dist',
     emptyOutDir: true
   },
   server: {

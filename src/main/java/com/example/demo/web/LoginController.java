@@ -2,6 +2,8 @@ package com.example.demo.web;
 
 import jakarta.servlet.http.HttpSession;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -14,11 +16,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class LoginController {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
 	private final JdbcTemplate jdbcTemplate;
+	private final AuditLogService auditLogService;
 	private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	public LoginController(JdbcTemplate jdbcTemplate) {
+	public LoginController(JdbcTemplate jdbcTemplate, AuditLogService auditLogService) {
 		this.jdbcTemplate = jdbcTemplate;
+		this.auditLogService = auditLogService;
 	}
 
 	@GetMapping("/login")
@@ -38,6 +43,7 @@ public class LoginController {
 		String trimmedUser = username == null ? "" : username.trim();
 		String trimmedPass = password == null ? "" : password.trim();
 		if (trimmedUser.isBlank()) {
+			LOGGER.warn("Login attempt with blank username");
 			return renderError(model, "Please enter your username.");
 		}
 		try {
@@ -70,11 +76,13 @@ public class LoginController {
 					trimmedUser
 			);
 			if (matches.isEmpty()) {
-				return renderError(model, "Username not found.");
+				LOGGER.warn("Failed login for username={}", trimmedUser);
+				return renderError(model, "Invalid username or password.");
 			}
 			AuthAccount account = matches.get(0);
 			if (!passwordMatches(trimmedPass, account.passwordHash())) {
-				return renderError(model, "Invalid password.");
+				LOGGER.warn("Failed login for username={}", trimmedUser);
+				return renderError(model, "Invalid username or password.");
 			}
 			String fullName = (safe(account.firstName()) + " " + safe(account.lastName())).trim();
 			String initials = initialsFor(account.firstName(), account.lastName());
@@ -88,14 +96,20 @@ public class LoginController {
 					account.profilePicUrl()
 			);
 			SessionUtil.setUser(session, profile);
+			auditLogService.log("AUTH_SUCCESS", "UserSession", String.valueOf(profile.employeeId()), "Login successful", profile);
 			return "redirect:/spa/";
 		} catch (DataAccessException ex) {
+			LOGGER.error("Login database error for username={}", trimmedUser, ex);
 			return renderError(model, "Unable to reach the database. Please try again.");
 		}
 	}
 
 	@GetMapping("/logout")
 	public String logout(HttpSession session) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile != null) {
+			auditLogService.log("AUTH_LOGOUT", "UserSession", String.valueOf(userProfile.employeeId()), "Logout successful", userProfile);
+		}
 		SessionUtil.clearUser(session);
 		return "redirect:/login";
 	}

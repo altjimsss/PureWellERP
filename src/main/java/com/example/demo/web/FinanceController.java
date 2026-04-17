@@ -29,9 +29,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class FinanceController {
 
 	private final JdbcTemplate jdbcTemplate;
+	private final AuditLogService auditLogService;
 
-	public FinanceController(JdbcTemplate jdbcTemplate) {
+	public FinanceController(JdbcTemplate jdbcTemplate, AuditLogService auditLogService) {
 		this.jdbcTemplate = jdbcTemplate;
+		this.auditLogService = auditLogService;
 	}
 
 	@GetMapping("/modules/finance")
@@ -144,8 +146,17 @@ public class FinanceController {
 			@RequestParam("recordType") String recordType,
 			@RequestParam("amount") BigDecimal amount,
 			@RequestParam("date") String date,
-			@RequestParam(name = "notes", required = false) String notes
+			@RequestParam(name = "notes", required = false) String notes,
+			HttpSession session
 	) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "FinancialRecord", String.valueOf(recordId), "Unauthorized update attempt", userProfile);
+			return "redirect:/modules/finance?error=forbidden";
+		}
 		jdbcTemplate.update(
 				"""
 				update financial_records
@@ -158,6 +169,7 @@ public class FinanceController {
 				notes,
 				recordId
 		);
+		auditLogService.log("UPDATE", "FinancialRecord", String.valueOf(recordId), "Updated financial record", userProfile);
 		return "redirect:/modules/finance";
 	}
 
@@ -166,8 +178,17 @@ public class FinanceController {
 			@RequestParam("recordType") String recordType,
 			@RequestParam("amount") BigDecimal amount,
 			@RequestParam("date") String date,
-			@RequestParam(name = "notes", required = false) String notes
+			@RequestParam(name = "notes", required = false) String notes,
+			HttpSession session
 	) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "FinancialRecord", null, "Unauthorized create attempt", userProfile);
+			return "redirect:/modules/finance?recordStatus=forbidden";
+		}
 		try {
 			jdbcTemplate.update(
 					"""
@@ -179,6 +200,7 @@ public class FinanceController {
 					LocalDate.parse(date),
 					notes
 			);
+			auditLogService.log("CREATE", "FinancialRecord", null, "Created financial record", userProfile);
 			return "redirect:/modules/finance?recordStatus=success";
 		} catch (DataAccessException ex) {
 			return "redirect:/modules/finance?recordStatus=error";
@@ -186,8 +208,17 @@ public class FinanceController {
 	}
 
 	@PostMapping("/modules/finance/records/delete")
-	public String deleteFinancialRecord(@RequestParam("recordId") Integer recordId) {
+	public String deleteFinancialRecord(@RequestParam("recordId") Integer recordId, HttpSession session) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "FinancialRecord", String.valueOf(recordId), "Unauthorized delete attempt", userProfile);
+			return "redirect:/modules/finance?error=forbidden";
+		}
 		jdbcTemplate.update("delete from financial_records where id = ?", recordId);
+		auditLogService.log("DELETE", "FinancialRecord", String.valueOf(recordId), "Deleted financial record", userProfile);
 		return "redirect:/modules/finance";
 	}
 
@@ -196,8 +227,17 @@ public class FinanceController {
 			@RequestParam("expenseType") String expenseType,
 			@RequestParam("amount") BigDecimal amount,
 			@RequestParam("date") String date,
-			@RequestParam(name = "description", required = false) String description
+			@RequestParam(name = "description", required = false) String description,
+			HttpSession session
 	) {
+		UserProfile userProfile = SessionUtil.getUser(session);
+		if (userProfile == null) {
+			return "redirect:/login";
+		}
+		if (!isAdmin(userProfile)) {
+			auditLogService.log("DENY", "Expense", null, "Unauthorized expense create attempt", userProfile);
+			return "redirect:/modules/finance?expenseStatus=forbidden";
+		}
 		try {
 			jdbcTemplate.update(
 					"""
@@ -209,10 +249,15 @@ public class FinanceController {
 					LocalDate.parse(date),
 					description
 			);
+			auditLogService.log("CREATE", "Expense", null, "Created expense entry", userProfile);
 			return "redirect:/modules/finance?expenseStatus=success";
 		} catch (DataAccessException ex) {
 			return "redirect:/modules/finance?expenseStatus=error";
 		}
+	}
+
+	private boolean isAdmin(UserProfile userProfile) {
+		return userProfile != null && "Admin".equalsIgnoreCase(userProfile.role());
 	}
 
 	private FinanceSnapshot loadSnapshot() {
@@ -410,14 +455,15 @@ public class FinanceController {
 	private List<ExpenseRow> loadRecentExpenses(Integer days, Integer limit) {
 		StringBuilder sql = new StringBuilder(
 				"select id, expense_type, amount, date, description from expenses");
-		Object[] params = new Object[] {};
+		List<Object> params = new java.util.ArrayList<>();
 		if (days != null) {
 			sql.append(" where date >= current_date - (? * interval '1 day')");
-			params = new Object[] { days };
+			params.add(days);
 		}
 		sql.append(" order by date desc, id desc");
 		if (limit != null) {
-			sql.append(" limit ").append(limit);
+			sql.append(" limit ?");
+			params.add(limit);
 		}
 		return jdbcTemplate.query(
 				sql.toString(),
@@ -428,7 +474,7 @@ public class FinanceController {
 						rs.getDate("date").toLocalDate(),
 						rs.getString("description")
 				),
-				params
+				params.toArray()
 		);
 	}
 
@@ -485,7 +531,8 @@ public class FinanceController {
 		}
 		sql.append(" order by date desc, id desc");
 		if (limit != null) {
-			sql.append(" limit ").append(limit);
+			sql.append(" limit ?");
+			params.add(limit);
 		}
 		return jdbcTemplate.query(
 				sql.toString(),

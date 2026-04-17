@@ -34,7 +34,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
 public class DesktopLauncher extends Application {
-	private static ConfigurableApplicationContext context;
+	private static volatile ConfigurableApplicationContext context;
 	private static final String APP_URL = "http://localhost:8080/login";
 	private static final String BASE_URL = "http://localhost:8080";
 	private static final CookieManager COOKIE_MANAGER = new CookieManager(null, CookiePolicy.ACCEPT_ALL);
@@ -71,135 +71,6 @@ public class DesktopLauncher extends Application {
 				if (location != null && location.contains("/login")) {
 					return;
 				}
-				String css = """
-						* {
-							box-sizing: border-box;
-							font-family: "Space Grotesk", "Segoe UI", sans-serif !important;
-						}
-						input, select, textarea, button {
-							appearance: none;
-							-webkit-appearance: none;
-							font-family: "Space Grotesk", "Segoe UI", sans-serif !important;
-						}
-						select {
-							appearance: none;
-							background-color: #ffffff;
-							border: 1px solid rgba(0, 0, 0, 0.08);
-							border-radius: 12px;
-							padding: 8px 36px 8px 12px;
-							font-size: 0.9rem;
-							color: #162432;
-							line-height: 1.2;
-							background-image:
-								linear-gradient(45deg, transparent 50%, #6b7c8f 50%),
-								linear-gradient(135deg, #6b7c8f 50%, transparent 50%);
-							background-position:
-								calc(100% - 18px) 50%,
-								calc(100% - 12px) 50%;
-							background-size: 6px 6px, 6px 6px;
-							background-repeat: no-repeat;
-						}
-						input[type="text"],
-						input[type="search"],
-						input[type="date"],
-						input[type="number"],
-						input[type="password"],
-						textarea {
-							background-color: #ffffff;
-							border: 1px solid rgba(0, 0, 0, 0.08);
-							border-radius: 12px;
-							padding: 8px 12px;
-							font-size: 0.9rem;
-							color: #162432;
-							line-height: 1.2;
-							box-shadow: none;
-							background-image: none !important;
-							appearance: none;
-							-webkit-appearance: none;
-						}
-						input::-webkit-search-decoration,
-						input::-webkit-search-cancel-button,
-						input::-webkit-search-results-button,
-						input::-webkit-search-results-decoration {
-							display: none;
-						}
-						button, .pill {
-							font-family: "Space Grotesk", "Segoe UI", sans-serif !important;
-						}
-						::placeholder {
-							color: #9aa8b8;
-						}
-						.search-input .search-icon {
-							display: none !important;
-						}
-						""";
-				engine.executeScript(
-						"var style=document.createElement('style');"
-								+ "style.innerHTML=" + quoteForJs(css) + ";"
-								+ "document.head.appendChild(style);"
-				);
-				engine.executeScript(
-						"try{document.documentElement.classList.add('desktop-performance');}catch(e){}"
-				);
-				String perfCssText = """
-						.desktop-performance * {
-							scroll-behavior: auto !important;
-						}
-						.desktop-performance .card,
-						.desktop-performance .card-stack,
-						.desktop-performance .panel,
-						.desktop-performance .table-shell,
-						.desktop-performance .modal-card,
-						.desktop-performance .list-card,
-						.desktop-performance .banner-card,
-						.desktop-performance .kpi-card,
-						.desktop-performance .pill,
-						.desktop-performance .app-shell,
-						.desktop-performance .main {
-							box-shadow: none !important;
-						}
-						.desktop-performance .sidebar {
-							box-shadow: none !important;
-						}
-						.desktop-performance .glass,
-						.desktop-performance .blur,
-						.desktop-performance .frost,
-						.desktop-performance .panel-header,
-						.desktop-performance .topbar {
-							backdrop-filter: none !important;
-							filter: none !important;
-						}
-						.desktop-performance * {
-							transition-duration: 0.08s !important;
-							animation-duration: 0.12s !important;
-							animation-iteration-count: 1 !important;
-						}
-						""";
-				engine.executeScript(
-						"var perf=document.createElement('style');"
-								+ "perf.innerHTML=" + quoteForJs(perfCssText) + ";"
-								+ "document.head.appendChild(perf);"
-				);
-				engine.executeScript(
-						"if(!window.Chart){"
-								+ "var s=document.querySelector('script[data-chartjs]');"
-								+ "if(!s){s=document.createElement('script');s.src='/js/vendor/chart.umd.min.js';s.async=true;s.dataset.chartjs='true';"
-								+ "s.onload=function(){document.dispatchEvent(new Event('chartjs:ready'));};document.head.appendChild(s);} }"
-								+ "else{document.dispatchEvent(new Event('chartjs:ready'));}"
-				);
-				engine.executeScript(
-						"setTimeout(function(){"
-								+ "if(typeof tryInitCharts==='function'){tryInitCharts();}"
-								+ "if(typeof renderExpensePie==='function'){renderExpensePie();}"
-								+ "if(typeof renderIncomeExpenseChart==='function'){renderIncomeExpenseChart();}"
-								+ "}, 300);"
-				);
-				engine.executeScript(
-						"try{"
-								+ "var routes=['/','/modules/finance','/modules/hrm','/modules/procurement','/modules/sales'];"
-								+ "routes.forEach(function(u){var l=document.createElement('link');l.rel='prefetch';l.href=u;document.head.appendChild(l);});"
-								+ "}catch(e){}"
-				);
 			}
 		});
 		String splashHtml = String.format(

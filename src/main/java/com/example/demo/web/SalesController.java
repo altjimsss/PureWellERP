@@ -383,18 +383,21 @@ public class SalesController {
 	}
 
 	private List<CustomerRow> loadCustomers(Integer limit) {
-		String sql = "select id, name, contact, address from customers order by id desc";
+		StringBuilder sql = new StringBuilder("select id, name, contact, address from customers order by id desc");
+		List<Object> params = new java.util.ArrayList<>();
 		if (limit != null) {
-			sql += " limit " + limit;
+			sql.append(" limit ?");
+			params.add(limit);
 		}
 		return jdbcTemplate.query(
-				sql,
+			sql.toString(),
 				(rs, rowNum) -> new CustomerRow(
 						rs.getInt("id"),
 						rs.getString("name"),
 						rs.getString("contact"),
 						rs.getString("address")
-				)
+				),
+				params.toArray()
 		);
 	}
 
@@ -430,14 +433,15 @@ public class SalesController {
 				join products p on oi.product_id = p.id
 				"""
 		);
-		Object[] params = new Object[] {};
+		List<Object> params = new java.util.ArrayList<>();
 		if (days != null) {
 			sql.append(" where o.order_date >= now() - (? * interval '1 day')");
-			params = new Object[] { days };
+			params.add(days);
 		}
 		sql.append(" order by o.order_date desc, o.id desc");
 		if (limit != null) {
-			sql.append(" limit ").append(limit);
+			sql.append(" limit ?");
+			params.add(limit);
 		}
 		return jdbcTemplate.query(
 				sql.toString(),
@@ -449,12 +453,12 @@ public class SalesController {
 						rs.getBigDecimal("total"),
 						rs.getTimestamp("sale_date").toLocalDateTime()
 				),
-				params
+				params.toArray()
 		);
 	}
 
 	private List<DeliveryRow> loadDeliveries(Integer limit) {
-		String sql =
+		StringBuilder sql = new StringBuilder(
 				"""
 				select odt.order_id as id,
 				       c.name as customer,
@@ -467,19 +471,22 @@ public class SalesController {
 				left join order_items oi on oi.order_id = o.id
 				group by odt.order_id, c.name, odt.delivery_date, odt.delivery_status
 				order by odt.delivery_date desc, odt.order_id desc
-				""";
+				""");
+		List<Object> params = new java.util.ArrayList<>();
 		if (limit != null) {
-			sql += " limit " + limit;
+			sql.append(" limit ?");
+			params.add(limit);
 		}
 		return jdbcTemplate.query(
-				sql,
+				sql.toString(),
 				(rs, rowNum) -> new DeliveryRow(
 						rs.getInt("id"),
 						rs.getString("customer"),
 						rs.getBigDecimal("total"),
 						rs.getDate("delivery_date").toLocalDate(),
 						rs.getString("status")
-				)
+				),
+				params.toArray()
 		);
 	}
 
