@@ -35,3 +35,5 @@ build/
 ### Local Secrets ###
 .env
 .env.local
+.portable-jre/
+portable-jre/

@@ -8,9 +8,10 @@
   "scripts": {
     "dev": "vite",
     "web-build": "tsc && vite build",
+    "sync-spa-to-backend": "node scripts/sync-spa-to-backend.cjs",
     "preview": "vite preview",
     "electron-dev": "tsc && concurrently \"npm run dev\" \"wait-on http://localhost:5173 && electron .\"",
-    "electron-build": "tsc && vite build && electron-builder --win --publish never -c.forceCodeSigning=false"
+    "electron-build": "node scripts/electron-build.cjs"
   },
   "devDependencies": {
     "@types/react": "^19.2.14",
@@ -42,8 +43,21 @@
       "electron-main.cjs",
       "electron-preload.cjs",
       "package.json",
-      "../target/demo-0.0.1-SNAPSHOT.jar",
       "node_modules/**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "../target/demo-0.0.1-SNAPSHOT.jar",
+        "to": "backend.jar"
+      },
+      {
+        "from": "../.env",
+        "to": "db.env"
+      },
+      {
+        "from": "../portable-jre",
+        "to": "jre"
+      }
     ],
     "directories": {
       "buildResources": "public"
@@ -53,6 +67,7 @@
         "portable"
       ],
       "icon": "purewelllogo.ico",
+      "signAndEditExecutable": false,
       "forceCodeSigning": false
     }
   }
